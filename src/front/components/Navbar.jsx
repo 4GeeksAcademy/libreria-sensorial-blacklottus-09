@@ -1,41 +1,82 @@
-import { Link } from "react-router-dom";
+import React from 'react';
+import useGlobalReducer from '../hooks/useGlobalReducer';
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/navbar.css'
 
 export const Navbar = () => {
+	const { store, dispatch } = useGlobalReducer();
+	const navigate = useNavigate();
+
+	const handleLogout = () => {
+		dispatch({ type: "LOGOUT" });
+		navigate("/");
+	};
 
 	return (
-		<nav class="navbar navbar-expand-lg bg-body-tertiary">
-			<div class="container-fluid">
-				<a class="navbar-brand" href="#">Navbar</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
+		<nav className="navbar navbar-expand-lg navbar-custom sticky-top">
+			<div className="container">
+				<Link className="navbar-brand-custom" to="/">
+					Librería Sensorial
+				</Link>
+
+				<button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span className="navbar-toggler-icon"></span>
 				</button>
-				<div class="collapse navbar-collapse" id="navbarSupportedContent">
-					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-						<li class="nav-item">
-							<a class="nav-link active" aria-current="page" href="#">Home</a>
+
+				<div className="collapse navbar-collapse" id="navbarNav">
+					<ul className="navbar-nav mx-auto">
+						<li className="nav-item">
+							<Link className="nav-link" to="/kits">Kits de Experiencia</Link>
 						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">Link</a>
+						<li className="nav-item">
+							<Link className="nav-link" to="/quienes-somos">Sobre Nosotros</Link>
 						</li>
-						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-								Dropdown
-							</a>
-							<ul class="dropdown-menu">
-								<li><a class="dropdown-item" href="#">Action</a></li>
-								<li><a class="dropdown-item" href="#">Another action</a></li>
-								<li><hr class="dropdown-divider"/></li>
-								<li><a class="dropdown-item" href="#">Something else here</a></li>
-							</ul>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link disabled" aria-disabled="true">Disabled</a>
+						<li className="nav-item">
+							<Link className="nav-link" to="/contactanos">Contactanos</Link>
 						</li>
 					</ul>
-					<form class="d-flex" role="search">
-						<input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-						<button class="btn btn-outline-success" type="submit">Search</button>
-					</form>
+				</div>
+
+				<div className="d-flex align-items-center">
+					<Link to="/busqueda" className="icon-link">
+						<i className="fas fa-search"></i>
+					</Link>
+
+					<Link to="/carrito" className="icon-link position-relative">
+						<i className="fas fa-shopping-cart"></i>
+						{store.totalItems > 0 && (
+							<span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent">
+								{store.totalItems}
+								<span className="visually-hidden">items in cart</span>
+							</span>
+						)}
+					</Link>
+
+					<div className="dropdown">
+						<button className="icon-link border-0 bg-transparent" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+							<i className="fas fa-user"></i>
+						</button>
+						<ul className="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+							{!store.token ? (
+								<>
+									<li><Link className="dropdown-item" to="/iniciar-sesion">Iniciar Sesión</Link></li>
+									<li><Link className="dropdown-item" to="/registro">Registrarse</Link></li>
+								</>
+							) : (
+								<>
+									<li><h6 className="dropdown-header">Mi Cuenta</h6></li>
+									<li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li>
+									<li><Link className="dropdown-item" to="/historial-de-compras">Mis Pedidos</Link></li>
+									<li><hr className="dropdown-divider" /></li>
+									<li>
+										<button className="dropdown-item" onClick={handleLogout}>
+											Cerrar Sesión
+										</button>
+									</li>
+								</>
+							)}
+						</ul>
+					</div>
 				</div>
 			</div>
 		</nav>

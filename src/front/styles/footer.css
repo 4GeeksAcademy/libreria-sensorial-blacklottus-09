@@ -1,0 +1,75 @@
+.footer-custom {
+    background-color: #4A4441; 
+    color: #EAE3DC; 
+}
+
+.footer-brand-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.footer-heading {
+    font-family: 'Playfair Display', serif;
+    color: #FFFFFF;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.footer-text {
+    color: #D3CFC7; 
+    font-size: 0.95rem;
+}
+
+.footer-link {
+    color: #D3CFC7;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #FFFFFF;
+    text-decoration: underline;
+}
+
+.social-link {
+    color: #EAE3DC;
+    font-size: 1.3rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.social-link:hover {
+    color: #BF7E6B; 
+}
+
+.newsletter-input {
+    background-color: #5C5552;
+    border: 1px solid #716965;
+    color: #FFFFFF;
+}
+.newsletter-input::placeholder {
+    color: #A9A29D;
+}
+.newsletter-input:focus {
+    background-color: #5C5552;
+    color: #FFFFFF;
+    border-color: #BF7E6B;
+    box-shadow: 0 0 0 0.2rem rgba(191, 126, 107, 0.25);
+}
+
+.btn-custom-accent {
+    background-color: #BF7E6B;
+    border-color: #BF7E6B;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+.btn-custom-accent:hover {
+    background-color: #A96A56;
+    border-color: #A96A56;
+}
+
+.border-top-custom {
+    border-top: 1px solid #5C5552 !important;
+}

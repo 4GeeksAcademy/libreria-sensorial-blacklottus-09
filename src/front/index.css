@@ -1,0 +1,168 @@
+body {
+    background-color: #F8F5F2; /* Fondo crema suave */
+    font-family: 'Lato', sans-serif;
+}
+
+
+/* --- 3. Clases de Utilidad de Marca --- */
+
+/* Títulos principales con la fuente de marca */
+.contact-title {
+    font-family: 'Playfair Display', serif;
+    color: #4A4441; /* Marrón oscuro */
+}
+
+/* Botón principal con el color de acento */
+.btn-custom-submit {
+    background-color: #BF7E6B; /* Terracota */
+    border-color: #BF7E6B;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-custom-submit:hover {
+    background-color: #A96A56; /* Terracota más oscuro */
+    border-color: #A96A56;
+    color: #FFFFFF;
+}
+
+/* Enlaces personalizados */
+.link-custom {
+    color: #BF7E6B; /* Terracota */
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.link-custom:hover {
+    text-decoration: underline;
+}
+
+/* Alerta de éxito personalizada */
+.alert-custom-success {
+    background-color: #E6F4EA; /* Verde pastel suave */
+    color: #3D6A4B;
+    border: 1px solid #C4E4CD;
+    border-radius: 8px;
+}
+
+
+/* --- 4. Estilos de Componentes Específicos --- */
+
+/* Navbar */
+.navbar-custom-bg {
+    background-color: #FDFBF8; /* Un blanco un poco más cálido que el default */
+}
+
+.navbar-brand-custom {
+    font-family: 'Playfair Display', serif;
+    color: #4A4441;
+}
+
+.nav-link-custom {
+    font-family: 'Lato', sans-serif;
+    color: #5C5552;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-link-custom:hover {
+    color: #4A4441;
+}
+
+.icon-link-custom {
+    color: #4A4441;
+    transition: color 0.3s ease;
+}
+
+.icon-link-custom:hover {
+    color: #BF7E6B;
+}
+
+.bg-custom-accent {
+    background-color: #BF7E6B !important;
+}
+
+
+/* Formularios */
+.form-control:focus {
+    border-color: #BF7E6B;
+    box-shadow: 0 0 0 0.25rem rgba(191, 126, 107, 0.25);
+}
+
+
+/* Footer */
+.footer-custom {
+    background-color: #4A4441;
+    color: #EAE3DC;
+}
+
+.footer-brand-title, .footer-heading {
+    font-family: 'Playfair Display', serif;
+    color: #FFFFFF;
+}
+
+.footer-text {
+    color: #D3CFC7;
+    font-size: 0.95rem;
+}
+
+.footer-link {
+    color: #D3CFC7;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #FFFFFF;
+}
+
+.social-link {
+    color: #EAE3DC;
+    font-size: 1.3rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.social-link:hover {
+    color: #BF7E6B;
+}
+
+.newsletter-input {
+    background-color: #5C5552;
+    border: 1px solid #716965;
+    color: #FFFFFF;
+}
+.newsletter-input::placeholder {
+    color: #A9A29D;
+}
+.newsletter-input:focus {
+    background-color: #5C5552;
+    color: #FFFFFF;
+    border-color: #BF7E6B;
+    box-shadow: 0 0 0 0.2rem rgba(191, 126, 107, 0.25);
+}
+
+.border-top-custom {
+    border-top: 1px solid #5C5552 !important;
+}
+
+.alert-custom-success {
+    background-color: #E6F4EA; 
+    color: #3D6A4B;
+    border: 1px solid #C4E4CD;
+    border-radius: 8px;
+}
+
+.link-custom {
+    color: #BF7E6B; 
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.link-custom:hover {
+    text-decoration: underline;
+}

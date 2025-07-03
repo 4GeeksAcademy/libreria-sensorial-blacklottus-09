@@ -34,3 +34,29 @@ class User(db.Model):
             "is_admin": self.is_admin,
             "avatar": self.avatar
         }
+    
+
+class ContactMessage(db.Model):
+    __tablename__ = 'contact_message'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    message: Mapped[str] = mapped_column(String(1000), nullable=False)
+    def serialize(self):
+        return{
+            "id": self.id,
+            "email": self.email,
+            "name": self.name,
+            "message": self.message,
+        }
+
+
+class Newsletter(db.Model):
+    __tablename__ = 'newsletter'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    def serialize(self):
+        return{
+            "id": self.id,
+            "email": self.email,
+            }

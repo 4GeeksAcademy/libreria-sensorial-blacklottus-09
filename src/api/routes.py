@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from api.models import db, User, ContactMessage,Newsletter
 from api.utils import generate_sitemap, APIException, password_security_check, send_email
 from api.decorators import admin_required
 from flask_cors import CORS
@@ -15,7 +15,6 @@ from datetime import timedelta
 api = Blueprint('api', __name__)
 
 CORS(api)
-
 
 def set_password(password, salt):
     return generate_password_hash(f'{password}{salt}')
@@ -133,7 +132,7 @@ def get_user():
     if claims.get('purpose') != "Login":
         return jsonify({"msg": "Token inválido para esta operacion"}), 403
     user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+    user = User.query.get(str(user_id))
 
     if user is None:
         return jsonify({"msg": "No se encontraron usuarios"})
@@ -142,41 +141,41 @@ def get_user():
 
 @api.route('/forgot-password', methods=["POST"])
 def forgot_password():
-
     body = request.json
     email = body.get("email")
+
+    if not email:
+        return jsonify({"msg": "El campo 'email' es requerido"}), 400
+
     user = User.query.filter_by(email=email).one_or_none()
 
     if user:
         additional_claims = {"purpose": "password_reset"}
         reset_token = create_access_token(
-            identity=(str(user.id)),
+            identity=str(user.id),
             additional_claims=additional_claims,
             expires_delta=timedelta(hours=1)
         )
 
-    reset_url = f'{os.getenv("FRONTEND_URL")}/recuperar-contraseña?token={reset_token}'
-    message = f"""
-        <div>
-            <h1>Recupera tu contraseña</h1>
-            <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-            <a href="{reset_url}" target="_blank">Restablecer Contraseña</a>
-            <p>Si no solicitaste esto, por favor ignora este correo.</p>
-        </div>
-    """
-    data = {
-        "subject": "Recuperación de contraseña",
-        "to": email,
-        "message": message
-    }
+        reset_url = f'{os.getenv("FRONTEND_URL")}/recuperar-contraseña?token={reset_token}'
+        
+        message = f"""
+            <div>
+                <h1>Recupera tu contraseña</h1>
+                <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+                <a href="{reset_url}" target="_blank">Restablecer Contraseña</a>
+            </div>
+        """
+        
+        data = {
+            "subject": "Recuperación de contraseña",
+            "to": email,
+            "message": message
+        }
 
-    sended_email = send_email(
-        data.get("subject"), data.get("to"), data.get("message"))
+        send_email(data.get("subject"), data.get("to"), data.get("message"))
 
-    if sended_email:
-        return jsonify({"msg": "Si tu correo está en nuestro sistema, recibirás un enlace para recuperar la contraseña."}), 200
-    else:
-        return jsonify({"msg": "internal error"}), 500
+    return jsonify({"msg": "Si tu correo está en nuestro sistema, recibirás un enlace."}), 200
 
 
 @api.route('/reset-password', methods=["PUT"])
@@ -191,16 +190,147 @@ def handle_password_reset():
 
     if not new_password:
         return jsonify({"msg": "Se requiere una nueva contraseña"}), 400
-    if password_security_check(new_password) == False:
-        return jsonify({"msg": "La contraseña debe ser segura"}), 400
-
+    
     user_id = get_jwt_identity()
-    user = User.query.get(str(user_id))
+    user = User.query.get(user_id) 
 
     if not user:
         return jsonify({"msg": "Usuario no encontrado"}), 404
 
-    user.password = set_password(new_password, user.salt)
+    user.password = set_password(new_password, user.salt) 
+    
     db.session.commit()
 
     return jsonify({"msg": "Contraseña actualizada exitosamente"}), 200
+
+@api.route ('/user-disable', methods=["PUT"])
+@admin_required()
+def disable_user():
+    data = request.json
+    user_id = data.get("user_id")
+
+    if not user_id:
+        return jsonify ({"msg": "Se necesita el user id para proceder"}), 404
+    
+    user = User.query.get(str(user_id))
+    user.is_active = False
+    try:
+        db.session.commit()
+        return jsonify ({"msg": f"el usuario {user.email} fue deshabilitado exitosamente"})
+    except Exception as error:
+        return jsonify ({"msg", f"Hubo un error intente nuevamente y si el problema persiste contacte a soporte {error}"}), 404
+
+
+@api.route ('/user-enable', methods=["PUT"])
+@admin_required()
+def enable_user():
+    data = request.json
+    user_id = data.get("user_id")
+
+    if not user_id:
+        return jsonify ({"msg": "Se necesita el user id para proceder"}), 404
+    
+    user = User.query.get(str(user_id))
+    user.is_active = True
+    try:
+        db.session.commit()
+        return jsonify ({"msg": f"el usuario {user.email} fue re-habilitado exitosamente"})
+    except Exception as error:
+        return jsonify ({"msg", f"Hubo un error intente nuevamente y si el problema persiste contacte a soporte {error}"}), 404
+
+
+@ api.route('/change-password', methods=["POST"])
+@ jwt_required()
+def change_password():
+    user_id=get_jwt_identity()
+    user=User.query.get(user_id)
+
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
+    body=request.get_json()
+    current_password=body.get("current_password")
+    new_password=body.get("new_password")
+
+    if not current_password or not new_password:
+        return jsonify({"msg": "Se requiere la contraseña actual y la nueva contraseña"}), 400
+
+    if not check_password(user.password, current_password, user.salt):
+        return jsonify({"msg": "La contraseña actual es incorrecta"}), 401
+
+    user.password=set_password(new_password, user.salt)
+    db.session.commit()
+
+    return jsonify({"msg": "Contraseña cambiada exitosamente"}), 200
+
+
+@api.route('/contact-form', methods=["POST"])
+def handle_Contact_Form():
+    data = request.get_json()
+
+    name = data.get('name')
+    email = data.get('email')
+    message = data.get('message')
+
+    if not name or not email or not message:
+        return jsonify({"msg": "Some fields are missing"}), 400
+    
+    try:
+        new_message = ContactMessage(name=name, email=email, message=message)
+        
+        db.session.add(new_message)
+        db.session.commit() 
+
+        success_response = {
+            "msg": "Message received and saved successfully!",
+            "status": "success",
+            "data": {
+                "id": new_message.id,
+                "name": new_message.name,
+                "email": new_message.email
+            }
+        }
+        return jsonify(success_response), 200
+
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({"msg": f"Error saving the info in the database: {str(error)}"}), 500 
+
+@api.route ('/get-contactform-info', methods=["GET"])
+@admin_required()
+def getContactForm():
+    try:
+        all_messages = ContactMessage.query.all()
+        
+        messages_list = []
+        for msg in all_messages:
+            messages_list.append({
+                "id": msg.id,
+                "name": msg.name,
+                "email": msg.email,
+                "message": msg.message,
+            })
+        
+        return jsonify(messages_list), 200
+
+    except Exception as error:
+        return jsonify({"msg":f"Error al recuperar mensajes de la base de datos: {error}"}), 500
+
+
+@api.route('/suscribe-newsletter', methods=['POST'])
+def subscribe_newsletter():
+    data = request.json
+    email = data.get("email")
+
+    if not email:
+        return jsonify({"msg": "El email es requerido"}), 400
+
+    new_subscription = Newsletter(email=email)
+
+    try:
+        db.session.add(new_subscription)
+        db.session.commit()
+        return jsonify({"msg": "¡Gracias por suscribirte!"}), 201
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({"msg": "Error al procesar la suscripción"}), 500

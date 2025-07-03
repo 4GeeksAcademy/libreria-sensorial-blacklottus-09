@@ -1,0 +1,55 @@
+/* --- Estilo Base de la Navbar --- */
+.navbar-custom {
+    background-color: #F8F5F2; /* Fondo crema suave */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+/* --- Logo con Tipografía de Marca --- */
+.navbar-brand-custom {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #4A4441; /* Marrón oscuro */
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* --- Estilo de los Enlaces de Navegación --- */
+.nav-link {
+    font-family: 'Lato', sans-serif;
+    color: #5C5552; /* Un tono de marrón más suave */
+    margin: 0 1rem;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #4A4441; /* Marrón oscuro al pasar el mouse */
+}
+
+/* --- Estilo para los Iconos --- */
+.icon-link {
+    color: #4A4441;
+    font-size: 1.2rem;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.icon-link:hover {
+    color: #BF7E6B; /* Color terracota de acento */
+}
+
+/* --- Estilo para la "pastilla" del carrito --- */
+.bg-accent {
+    background-color: #BF7E6B !important; /* Color terracota */
+}
+
+/* --- Estilo para el botón de menú de Bootstrap en móvil --- */
+.navbar-toggler {
+    border: none;
+}
+.navbar-toggler:focus {
+    box-shadow: none;
+}
