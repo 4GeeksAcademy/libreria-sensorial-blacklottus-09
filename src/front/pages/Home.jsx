@@ -16,11 +16,11 @@ export const Home = () => {
                 <img 
                     src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070" 
                     alt="Una colección de libros antiguos" 
-                    className="img-fluid w-100"
-                    style={{ height: '70vh', objectFit: 'cover' }}
+                    className="img-fluid w-100 banner"
+
                 />
-                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                    <h1 className="display-3 fw-bold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center banner" >
+                    <h1 className="display-3 fw-bold font-title" >
                         Más que un libro, una experiencia
                     </h1>
                     <p className="lead my-3">
@@ -37,17 +37,17 @@ export const Home = () => {
                 <h2 className="contact-title mb-5">Una Experiencia Sensorial en 3 Pasos</h2>
                 <div className="row">
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-book-open fa-3x mb-3" style={{ color: '#BF7E6B' }}></i>
+                        <i className="fas fa-book-open fa-3x mb-3 terracota"></i>
                         <h3 className="h4">1. Elige tu Aventura</h3>
                         <p className="text-muted">Selecciona un kit basado en el género o la sensación que buscas.</p>
                     </div>
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-box-open fa-3x mb-3" style={{ color: '#BF7E6B' }}></i>
+                        <i className="fas fa-box-open fa-3x mb-3 terracota"></i>
                         <h3 className="h4">2. Recíbelo en tu Puerta</h3>
                         <p className="text-muted">Preparamos tu caja con todos los elementos cuidadosamente seleccionados.</p>
                     </div>
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-mug-hot fa-3x mb-3" style={{ color: '#BF7E6B' }}></i>
+                        <i className="fas fa-mug-hot fa-3x mb-3 terracota"></i>
                         <h3 className="h4">3. Desconecta y Disfruta</h3>
                         <p className="text-muted">Prepara tu bebida, pon la música y déjate llevar por la lectura.</p>
                     </div>
@@ -55,7 +55,7 @@ export const Home = () => {
             </div>
 
             {/* --- 3. Kits Destacados --- */}
-            <div className="py-5" style={{ backgroundColor: '#FDFDFD' }}>
+            <div className="py-5 background-focus" >
                 <div className="container">
                     <h2 className="contact-title text-center mb-5">Nuestros Kits Más Populares</h2>
                     <div className="row">

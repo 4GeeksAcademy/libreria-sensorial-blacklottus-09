@@ -15,7 +15,7 @@ export const Footer = () => {
         const url = import.meta.env.VITE_BACKEND_URL;
 
         try {
-            const response = await fetch(`${url}/api/suscribe-newsletter`, {
+            const response = await fetch(`${url}/api/newsletter`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email })

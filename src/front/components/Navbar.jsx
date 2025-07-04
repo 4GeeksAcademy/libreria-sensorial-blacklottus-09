@@ -2,6 +2,8 @@ import React from 'react';
 import useGlobalReducer from '../hooks/useGlobalReducer';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/navbar.css'
+import  logo from '../assets/img/logo.png'
+
 
 export const Navbar = () => {
 	const { store, dispatch } = useGlobalReducer();
@@ -16,6 +18,7 @@ export const Navbar = () => {
 		<nav className="navbar navbar-expand-lg navbar-custom sticky-top">
 			<div className="container">
 				<Link className="navbar-brand-custom" to="/">
+				<img src={logo} className='logo-image'/>
 					Librería Sensorial
 				</Link>
 
