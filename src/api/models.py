@@ -82,20 +82,23 @@ class Product (db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    stock_quantity: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now())
 
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
     category: Mapped["Category"] = relationship(back_populates="products")
 
-    variants: Mapped[List["ProductVariant"]] = relationship(back_populates="product") #, cascade="all, delete-orphan"
-    images: Mapped[List["ProductImage"]] = relationship(back_populates="product") #, cascade="all, delete-orphan"
-    reviews: Mapped[List["Review"]] = relationship(back_populates="product") #, cascade="all, delete-orphan"
+    variants: Mapped[List["ProductVariant"]] = relationship(back_populates="product") 
+    images: Mapped[List["ProductImage"]] = relationship(back_populates="product") 
+    reviews: Mapped[List["Review"]] = relationship(back_populates="product") 
     tags: Mapped[List["Tag"]] = relationship(secondary=product_tags_association, back_populates="products")
 
     def serialize(self):
         return {
             "id": self.id, "name": self.name, "description": self.description, "created_at": self.created_at,
+            "price": self.price, "stock_quantity":self.stock_quantity,
             "category": self.category.serialize() if self.category else None,
             "images": [image.serialize() for image in self.images],
             "variants": [variant.serialize() for variant in self.variants],
@@ -123,16 +126,14 @@ class ProductVariant(db.Model):
     __tablename__ = "product_variants"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[int] = mapped_column(String(120), nullable=False)
-    price: Mapped[int] = mapped_column(Integer, nullable=False)
-    stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
+    description: Mapped[str] = mapped_column(Text)
 
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     product: Mapped["Product"] = relationship(back_populates="variants")
 
     def serialize(self):
         return {
-            "id": self.id, "name": self.name, "price": self.price,
-            "stock_quantity": self.stock_quantity,
+            "id": self.id, "name": self.name, "description": self.description
         }
 
 
@@ -208,7 +209,7 @@ class Order(db.Model):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["User"] = relationship(back_populates="orders")
-    items: Mapped[List["OrderItems"]] = relationship(back_populates="order")
+    items: Mapped[List["OrderItem"]] = relationship(back_populates="order")
 
     def serialize(self):
         return {
@@ -218,7 +219,7 @@ class Order(db.Model):
         }
 
 
-class OrderItems(db.Model):
+class OrderItem(db.Model):
     __tablename__ = 'order_items'
     id: Mapped[int] = mapped_column(primary_key=True)
     quantity: Mapped[int] = mapped_column(Integer, default=1)

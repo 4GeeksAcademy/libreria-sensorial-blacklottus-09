@@ -2,19 +2,13 @@ body {
     background-color: #F8F5F2; /* Fondo crema suave */
     font-family: 'Lato', sans-serif;
 }
-
-
-/* --- 3. Clases de Utilidad de Marca --- */
-
-/* Títulos principales con la fuente de marca */
 .contact-title {
     font-family: 'Playfair Display', serif;
-    color: #4A4441; /* Marrón oscuro */
+    color: #4A4441;
 }
 
-/* Botón principal con el color de acento */
 .btn-custom-submit {
-    background-color: #BF7E6B; /* Terracota */
+    background-color: #BF7E6B; 
     border-color: #BF7E6B;
     color: #FFFFFF;
     font-weight: bold;
@@ -25,14 +19,13 @@ body {
 }
 
 .btn-custom-submit:hover {
-    background-color: #A96A56; /* Terracota más oscuro */
+    background-color: #A96A56;
     border-color: #A96A56;
     color: #FFFFFF;
 }
 
-/* Enlaces personalizados */
 .link-custom {
-    color: #BF7E6B; /* Terracota */
+    color: #BF7E6B; 
     font-weight: bold;
     text-decoration: none;
 }
@@ -41,20 +34,16 @@ body {
     text-decoration: underline;
 }
 
-/* Alerta de éxito personalizada */
 .alert-custom-success {
-    background-color: #E6F4EA; /* Verde pastel suave */
+    background-color: #E6F4EA; 
     color: #3D6A4B;
     border: 1px solid #C4E4CD;
     border-radius: 8px;
 }
 
 
-/* --- 4. Estilos de Componentes Específicos --- */
-
-/* Navbar */
 .navbar-custom-bg {
-    background-color: #FDFBF8; /* Un blanco un poco más cálido que el default */
+    background-color: #FDFBF8; 
 }
 
 .navbar-brand-custom {
@@ -87,14 +76,12 @@ body {
 }
 
 
-/* Formularios */
 .form-control:focus {
     border-color: #BF7E6B;
     box-shadow: 0 0 0 0.25rem rgba(191, 126, 107, 0.25);
 }
 
 
-/* Footer */
 .footer-custom {
     background-color: #4A4441;
     color: #EAE3DC;
@@ -167,7 +154,7 @@ body {
     text-decoration: underline;
 }
 .logo-image{
-    width: 80px;
+    height: 80px ;
 }
 .banner{
     height:  70vh; 
@@ -178,8 +165,12 @@ body {
   font-family: 'Playfair Display', serif;
 }
 
-.terracota{
+.text-terracota{
     color:#BF7E6B;
+}
+.terracota{
+    background-color:#BF7E6B;
+    color:white
 }
 .background-focus{
     background-color: #FDFDFD;

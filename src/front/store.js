@@ -1,17 +1,18 @@
 export const initialStore = () => {
   return {
     totalItems: 0,
-    token: null, // Es mejor usar null que un string vacío para el token
-    localCart: [], // Necesitarás el carrito para la lógica de compra
+    token: null,
+    localCart: [],
+    products: [],
   };
 };
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
-    case "ADD_TO_CART":
+    case "GET_PRODUCTS":
       return {
         ...store,
-        localCart: [...store.localCart, action.payload],
+        products: action.payload,
       };
 
     case "INCREMENT_TOTAL_ITEMS":

@@ -23,6 +23,14 @@ import { Registro } from "./pages/Registro";
 import { IniciarSesion } from "./pages/IniciarSesion";
 import { RecuperarContraseña } from "./pages/RecuperarContraseña";
 import { OlvidoContraseña } from "./pages/OlvidoContraseña";
+import { Perfil } from "./pages/Perfil";
+import { Pedidos } from "./pages/Pedidos";
+
+// busqueda y producto
+import { Carrito } from "./pages/Carrito";
+import { Busqueda } from "./pages/Busqueda";
+import { Kits } from "./pages/Kits";
+import { VistaProducto } from "./pages/VistaProducto";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -52,7 +60,15 @@ export const router = createBrowserRouter(
       <Route path="/iniciar-sesion" element={<IniciarSesion />} />
       <Route path="/olvido-su-contraseña" element={<OlvidoContraseña />} />
       <Route path="/recuperar-contraseña" element={<RecuperarContraseña />} />
-        
+      <Route path="/perfil" element={<Perfil/>} />
+      <Route path="/pedidos" element={<Pedidos/>} />
+
+      {/* kits, vista producto, carrito y busqueda */}
+      <Route path="/kits" element={<Kits />} />
+      <Route path="/kit/:id" element={<VistaProducto />} />
+      <Route path="/carrito" element={<Carrito />} />
+      <Route path="/busqueda" element={<Busqueda />} />
+
     </Route>
   )
 );

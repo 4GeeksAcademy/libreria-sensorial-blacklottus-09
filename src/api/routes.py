@@ -1,8 +1,9 @@
 import os
+from sqlalchemy.sql import func
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import (db, User, ContactMessage, Newsletter,
                         Product, ProductImage, ProductVariant,
-                        Category, Tag, Review, OrderStatusEnum,
+                        Category, Tag, Review, OrderStatus,
                         Order, OrderItem)
 from api.utils import generate_sitemap, APIException, password_security_check, send_email
 from api.decorators import admin_required
@@ -58,7 +59,7 @@ def handle_register():
     # se valida que el correo no este guardado en la base de datos
     user = User.query.filter_by(email=data["email"]).one_or_none()
     if user is not None:
-        return jsonify({"msg": "Este correo ya esta registrado"}), 400
+        return jsonify({"msg": "Este usuario ya esta registrado"}), 400
 
     # usando la funcion que esta en utils se valida la seguridad de la contraseña
     if password_security_check(data["password"]) == False:
@@ -113,8 +114,10 @@ def handle_login():
                 # se revisa si el password concuerda con el que esta en la base de datos y si es correcto se envia un token
                 additional_claims = {
                     "is_admin": user.is_admin, "purpose": "Login"}
-                token = create_access_token(identity=str(
-                    user.id), additional_claims=additional_claims)
+                token = create_access_token(
+                    identity=str(user.id),
+                    additional_claims=additional_claims,
+                    expires_delta=timedelta(hours=72))
                 return jsonify({"token": token}), 200
             else:
                 return ({"msg": "Las credenciales de acceso son invalidas"}), 400
@@ -306,7 +309,7 @@ def handle_Contact_Form():
         return jsonify({"msg": f"Error saving the info in the database: {str(error)}"}), 500
 
 
-@api.route('/contactform', methods=["GET"])
+@api.route('/contact-form', methods=["GET"])
 @admin_required()
 @jwt_required()
 def getContactForm():
@@ -360,19 +363,26 @@ def get_newsletter_suscriptors():
 
 
 @api.route('/products', methods=['POST'])
+@jwt_required()
+@admin_required()
 def create_product():
     data = request.json
     name = data.get("name")
     description = data.get("description")
     category_id = data.get("category_id")
+    price = data.get("price")
+    stock_quantity = data.get("stock_quantity", 0)
 
-    if not data or not name or not description or not category_id:
+    if not data or not name or not description or not category_id or not price:
         return jsonify({"msg": "Some fields are missing"}), 400
 
     new_product = Product(
         name=name,
         description=description,
-        category_id=category_id)
+        category_id=category_id,
+        price=price,
+        stock_quantity=stock_quantity
+    )
     try:
         db.session.add(new_product)
         db.session.commit()
@@ -398,6 +408,8 @@ def get_product(product_id):
 
 
 @api.route('/products/<int:product_id>', methods=['PUT'])
+@jwt_required()
+@admin_required()
 def update_product(product_id):
     product = Product.query.get(product_id)
 
@@ -409,6 +421,8 @@ def update_product(product_id):
     product.name = data.get("name", product.name)
     product.description = data.get("description", product.description)
     product.category_id = data.get("category_id", product.category_id)
+    product.price = data.get("price", product.price),
+    product.stock_quantity = data.get("stock_quantity", product.stock_quantity)
 
     try:
         db.session.commit()
@@ -420,6 +434,8 @@ def update_product(product_id):
 
 
 @api.route('/products/<int:product_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required()
 def delete_product(product_id):
     product = Product.query.get(product_id)
 
@@ -435,6 +451,8 @@ def delete_product(product_id):
 
 
 @api.route('/categories', methods=['POST'])
+@jwt_required()
+@admin_required()
 def create_category():
     data = request.json
     name = data.get("name")
@@ -458,7 +476,7 @@ def create_category():
 
 @api.route('/categories', methods=['GET'])
 def get_all_categories():
-    categories = Category.querry.all()
+    categories = Category.query.all()
 
     return jsonify(list(map(lambda item: item.serialize(), categories))), 200
 
@@ -474,6 +492,8 @@ def get_category(category_id):
 
 
 @api.route('/categories/<int:category_id>', methods=['PUT'])
+@jwt_required()
+@admin_required()
 def update_category(category_id):
 
     category = Category.query.get(category_id)
@@ -492,6 +512,8 @@ def update_category(category_id):
 
 
 @api.route('/categories/<int:category_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required()
 def delete_category(category_id):
     category = Category.query.get(category_id)
     if not category:
@@ -508,7 +530,9 @@ def delete_category(category_id):
         return jsonify({"msg": f"Error deleting the category {error}"}), 500
 
 
-@api.route('/products/<int:product_id>', methods=['POST'])
+@api.route('/products/<int:product_id>/images', methods=['POST'])
+@jwt_required()
+@admin_required()
 def add_image_to_product(product_id):
     product = Product.query.get(product_id)
     if not product:
@@ -518,14 +542,11 @@ def add_image_to_product(product_id):
         return jsonify({"msg": "No image file found in the request"}), 400
 
     image_file = request.files['image_file']
-    data = request.json
+    alt_text = request.form.get("alt_text", f"Imagen de {product.name}")
 
     try:
-        upload_result = cloudinary.uploader.upload(image_file)
-        image_url = upload_result['image_url']
-
-        image_url = image_url
-        alt_text = data.get("alt_text")
+        upload_result = uploader.upload(image_file)
+        image_url = upload_result['secure_url']
 
         new_image = ProductImage(
             image_url=image_url,
@@ -538,7 +559,7 @@ def add_image_to_product(product_id):
         return jsonify(new_image.serialize()), 201
     except Exception as error:
         db.session.rollback()
-        return jsonify({"msg": f"Error adding image {error}"}), 500
+        return jsonify({"msg": f"Error al subir la imagen: {error}"}), 500
 
 
 @api.route('/products/<int:product_id>/images', methods=['GET'])
@@ -552,6 +573,8 @@ def get_product_images(product_id):
 
 
 @api.route('/images/<int:image_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required()
 def delete_product_image(image_id):
     image = ProductImage.query.get(image_id)
 
@@ -568,6 +591,8 @@ def delete_product_image(image_id):
 
 
 @api.route('/product/<int:product_id>/variants', methods=['POST'])
+@jwt_required()
+@admin_required()
 def create_product_variant(product_id):
     product = Product.query.get(product_id)
 
@@ -576,14 +601,13 @@ def create_product_variant(product_id):
 
     data = request.json
     name = data.get("name")
-    price = data.get("price")
-    stock_quantity = data.get("stock_quantity", 0)
+    description = data.get("description")
 
-    if not name or not price:
-        return jsonify({"msg": "Fields 'name' and 'price' are required"}), 400
+    if not name:
+        return jsonify({"msg": "Field 'name' is required"}), 400
 
     new_variant = ProductVariant(
-        name=name, price=price, stock_quantity=stock_quantity, product_id=product.id
+        name=name, product_id=product.id, description=description
     )
     try:
         db.session.add(new_variant)
@@ -603,6 +627,8 @@ def get_variant(variant_id):
 
 
 @api.route('/variants/<int:variant_id>', methods=['PUT'])
+@jwt_required()
+@admin_required()
 def update_variant(variant_id):
     variant = ProductVariant.query.get(variant_id)
     if not variant:
@@ -622,6 +648,8 @@ def update_variant(variant_id):
 
 
 @api.route('/variants/<int:variant_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required()
 def delete_variant(variant_id):
     variant = ProductVariant.query.get(variant_id)
 
@@ -638,6 +666,8 @@ def delete_variant(variant_id):
 
 
 @api.route('/tags', methods=['POST'])
+@jwt_required()
+@admin_required()
 def create_tag():
     data = request.json
     name = data.get("name")
@@ -662,11 +692,13 @@ def create_tag():
 @api.route('/tags', methods=['GET'])
 def get_all_tags():
     tags = Tag.query.all()
-    
+
     return jsonify(list(map(lambda item: item.serialize(), tags))), 200
 
 
 @api.route('/products/<int:product_id>/tags/<int:tag_id>', methods=['POST'])
+@jwt_required()
+@admin_required()
 def add_tag_to_product(product_id, tag_id):
     product = Product.query.get(product_id)
     tag = Tag.query.get(tag_id)
@@ -675,7 +707,7 @@ def add_tag_to_product(product_id, tag_id):
         return jsonify({"msg": "Product not found"}), 404
     if not tag:
         return jsonify({"msg": "Tag not found"}), 404
-    
+
     product.tag.append(tag)
 
     try:
@@ -686,7 +718,9 @@ def add_tag_to_product(product_id, tag_id):
     return jsonify({"msg": "An internal error occurred while adding the tag."}), 500
 
 
-@api.route ('/products/<int:product_id>/tags/<int:tag_id>', methods=['DELETE'])
+@api.route('/products/<int:product_id>/tags/<int:tag_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required()
 def remove_tag_from_product(product_id, tag_id):
     product = Product.query.get(product_id)
     tag = Tag.query.get(tag_id)
@@ -695,10 +729,10 @@ def remove_tag_from_product(product_id, tag_id):
         return jsonify({"msg": "Product not found"}), 404
     if not tag:
         return jsonify({"msg": "Tag not found"}), 404
-    
+
     if tag not in product.tags:
         return jsonify({"msg": "Tag is not associated with this product"}), 404
-    
+
     product.tags.remove(tag)
     try:
         db.session.commit()
@@ -711,8 +745,8 @@ def remove_tag_from_product(product_id, tag_id):
 @api.route('/products/<int:product_id>/reviews', methods=['POST'])
 @jwt_required()
 def create_review(product_id):
-    current_user_id = get_jwt_identity() 
-    
+    current_user_id = get_jwt_identity()
+
     product = Product.query.get(product_id)
     if not product:
         return jsonify({"msg": "Product not found"}), 404
@@ -722,7 +756,8 @@ def create_review(product_id):
     if rating is None:
         return jsonify({"msg": "Rating is required"}), 400
 
-    existing_review = Review.query.filter_by(product_id=product.id, user_id=current_user_id).first()
+    existing_review = Review.query.filter_by(
+        product_id=product.id, user_id=current_user_id).first()
     if existing_review:
         return jsonify({"msg": "You have already reviewed this product"}), 409
 
@@ -747,13 +782,13 @@ def get_product_reviews(product_id):
     product = Product.query.get(product_id)
     if not product:
         return jsonify({"msg": "Product not found"}), 404
-        
+
     reviews = [review.serialize() for review in product.reviews]
     return jsonify(reviews), 200
 
 
 @api.route('/reviews/<int:review_id>', methods=['PUT'])
-@jwt_required() 
+@jwt_required()
 def update_review(review_id):
     current_user_id = get_jwt_identity()
     review = Review.query.get(review_id)
@@ -763,7 +798,7 @@ def update_review(review_id):
 
     if review.user_id != current_user_id:
         return jsonify({"msg": "Forbidden: You are not the author of this review"}), 403
-    
+
     data = request.json
     review.rating = data.get("rating", review.rating)
     review.comment = data.get("comment", review.comment)
@@ -780,14 +815,14 @@ def update_review(review_id):
 @jwt_required()
 def delete_review(review_id):
     current_user_id = get_jwt_identity()
-    
+
     review = Review.query.get(review_id)
     if not review:
         return jsonify({"msg": "Review not found"}), 404
 
     if review.user_id != current_user_id:
         return jsonify({"msg": "Forbidden: You are not the author of this review"}), 403
-        
+
     try:
         db.session.delete(review)
         db.session.commit()
@@ -795,7 +830,7 @@ def delete_review(review_id):
     except Exception as error:
         db.session.rollback()
         return jsonify({"msg": f"Error deleting review: {error}"}), 500
-    
+
 
 @api.route('/admin/reviews/<int:review_id>', methods=['DELETE'])
 @jwt_required()
@@ -804,7 +839,7 @@ def admin_delete_review(review_id):
     review = Review.query.get(review_id)
     if not review:
         return jsonify({"msg": "Review not found"}), 404
-        
+
     try:
         db.session.delete(review)
         db.session.commit()
@@ -827,8 +862,11 @@ def create_order():
     try:
         for item_data in items_data:
             variant = ProductVariant.query.get(item_data.get("variant_id"))
-            if not variant: raise Exception(f"Variant with ID {item_data.get('variant_id')} not found.")
-            if variant.stock_quantity < item_data.get("quantity"): raise Exception(f"Not enough stock for {variant.name}.")
+            if not variant:
+                raise Exception(
+                    f"Variant with ID {item_data.get('variant_id')} not found.")
+            if variant.stock_quantity < item_data.get("quantity"):
+                raise Exception(f"Not enough stock for {variant.name}.")
             variant.stock_quantity -= item_data.get("quantity")
             total_amount += variant.price * item_data.get("quantity")
             order_items_to_create.append({
@@ -846,13 +884,16 @@ def create_order():
         db.session.rollback()
         return jsonify({"msg": str(error)}), 400
 
+
 @api.route('/orders', methods=['GET'])
 @jwt_required()
 def get_user_orders():
     current_user_id = get_jwt_identity()
-    user_orders = Order.query.filter_by(user_id=current_user_id).order_by(Order.order_date.desc()).all()
+    user_orders = Order.query.filter_by(
+        user_id=current_user_id).order_by(Order.order_date.desc()).all()
     results = [order.serialize() for order in user_orders]
     return jsonify(results), 200
+
 
 @api.route('/orders/<int:order_id>', methods=['GET'])
 @jwt_required()
@@ -866,6 +907,7 @@ def get_order_details(order_id):
         return jsonify({"msg": "Forbidden"}), 403
     return jsonify(order.serialize()), 200
 
+
 @api.route('/orders/<int:order_id>/status', methods=['PUT'])
 @jwt_required()
 @admin_required()
@@ -876,7 +918,7 @@ def update_order_status(order_id):
     data = request.json
     new_status_str = data.get("status")
     try:
-        new_status = OrderStatusEnum(new_status_str)
+        new_status = OrderStatus(new_status_str)
     except ValueError:
         return jsonify({"msg": f"Invalid status: '{new_status_str}'"}), 400
     order.status = new_status
