@@ -134,7 +134,7 @@ body {
 }
 
 .border-top-custom {
-    border-top: 1px solid #5C5552 !important;
+    border-top: 1px solid #5C5552;
 }
 
 .alert-custom-success {
@@ -173,5 +173,17 @@ body {
     color:white
 }
 .background-focus{
-    background-color: #FDFDFD;
+    background-color: FDFBF8;
 }
+
+.user-picture{
+    width: 50px;
+    border-radius: 100%;
+}
+.thumbnail-image{
+    width: 100px;
+    height: 100px;
+    cursor: pointer; 
+    object-fit: cover;
+}
+

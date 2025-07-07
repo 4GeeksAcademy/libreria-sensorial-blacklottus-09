@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { Link } from "react-router-dom"
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-
+import { ProductCard } from "../components/ProductCard.jsx";
 
 export const Home = () => {
 
@@ -11,11 +11,10 @@ export const Home = () => {
     return (
         <div className="body-custom-bg">
             <div className="position-relative text-center text-white">
-                <img 
-                    src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751735236/photo-1524995997946-a1c2e315a42f_kqzfz7.jpg" 
-                    alt="Una colección de libros antiguos" 
-                    className="img-fluid w-100"
-                    style={{ height: '70vh', objectFit: 'cover' }}
+                <img
+                    src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751888448/Gemini_Generated_Image_dtb7cidtb7cidtb7_vgnckj.png"
+                    alt="Una colección de libros antiguos"
+                    className="img-fluid w-100 banner"
                 />
                 <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                     <h1 className="display-3 fw-bold contact-title text-white">
@@ -51,22 +50,13 @@ export const Home = () => {
                 </div>
             </div>
 
-            <div className="py-5" style={{ backgroundColor: '#FDFBF8' }}>
+            <div className="py-5 background-focus" >
                 <div className="container">
                     <h2 className="contact-title text-center mb-5">Algunos de Nuestros Kits</h2>
                     <div className="row">
                         {products.slice(0, 4).map((product) => (
                             <div key={product.id} className="col-lg-3 col-md-6 mb-4">
-                                <div className="card h-100 border-0 shadow-sm rounded-4">
-                                    <img src={product.images && product.images.length > 0 ? product.images[0].image_url : "https://via.placeholder.com/400x300"} className="card-img-top" alt={product.name} style={{ height: '250px', objectFit: 'cover' }} />
-                                    <div className="card-body d-flex flex-column">
-                                        <h5 className="card-title contact-title">{product.name}</h5>
-                                        <p className="card-text fs-4 mt-3 text-muted">{product.price} {" "}$</p>
-                                        <Link to={`/kit/${product.id}`} className="btn btn-custom-submit mt-auto">
-                                            Ver Detalles
-                                        </Link>
-                                    </div>
-                                </div>
+                                <ProductCard product={product} />
                             </div>
                         ))}
                     </div>

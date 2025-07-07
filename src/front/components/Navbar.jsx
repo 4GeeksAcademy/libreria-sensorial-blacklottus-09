@@ -1,26 +1,37 @@
 import React from 'react';
 import useGlobalReducer from '../hooks/useGlobalReducer';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/navbar.css';
 import logo from '../assets/img/logo.png';
 
 export const Navbar = () => {
+    const [searchQuery, setSearchQuery] = useState('');
     const { store, dispatch } = useGlobalReducer();
     const navigate = useNavigate();
+
+    const totalItemsInCart = store.cartItems.reduce((total, item) => total + item.cantidad, 0);
 
     const handleLogout = () => {
         dispatch({ type: "LOGOUT" });
         navigate("/");
     };
 
-    const handleRemoveFromCart = (item) => {
-        dispatch({ type: "REMOVE_FAVORITE", payload: item }); // Asumiendo que esta es la acción correcta
+    const handleRemoveFromCartDropdown = (itemToRemove) => {
+        dispatch({ type: "REMOVE_ITEM", payload: { productId: itemToRemove.id } });
+    };
+    const handleSearchSubmit = (event) => {
+        event.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/busqueda?q=${searchQuery}`);
+            setSearchQuery('');
+        }
     };
 
     return (
         <nav className="navbar navbar-expand-lg navbar-custom sticky-top pt-1">
             <div className="container">
-                <Link className="navbar-brand-custom pb-3" to="/">
+                <Link className="navbar-brand-custom pb-3 pb-lg-0" to="/">
                     <img src={logo} className='logo-image' alt="Librería Sensorial Logo" />
                 </Link>
 
@@ -28,59 +39,89 @@ export const Navbar = () => {
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav mx-auto">
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/kits">Kits de Experiencia</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/quienes-somos">Sobre Nosotros</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/contactanos">Contactanos</Link>
-                        </li>
-                    </ul>
+                <div className=" collapse navbar-collapse " id="navbarNav">
+                    <form className=" d-flex input-group input-group-lg my-lg-auto mb-4" onSubmit={handleSearchSubmit}>
+                        <input
+                            type="search"
+                            className="form-control ms-lg-5 "
+                            placeholder="Buscar productos..."
+                            aria-label="Buscar"
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                        />
+                        <button className="btn terracota me-lg-5" type="submit">
+                            <i className="fas fa-search fa-lg"></i>
+                        </button>
+                    </form>
                 </div>
-
-                <div className="d-flex align-items-center">
-                    <Link to="/busqueda" className="icon-link me-3">
-                        <i className="fas fa-search"></i>
-                    </Link>
-
-                    {/* --- Carrito de Compras (Corregido) --- */}
-                    <div className="btn-group">
+                <div className="d-flex align-items-center ">
+                    <div className="btn-group me-3 m-auto ">
                         <button
                             type="button"
-                            className="btn border-0 position-relative icon-link border-0 bg-transparent"
+                            className="btn border-0 position-relative icon-link bg-transparent p-0" 
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                         >
-                            <i className="fa-solid fa-cart-shopping"></i>
-                            {store.totalItems > 0 && (
-                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                                    {store.totalItems}
+                            <i className="fa-solid fa-cart-shopping fa-lg"></i>
+                            {totalItemsInCart > 0 && (
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill terracota ">
+                                    {totalItemsInCart}{" "}
                                     <span className="visually-hidden">items in cart</span>
                                 </span>
                             )}
                         </button>
-                        <ul className="dropdown-menu dropdown-menu-end">
-                            <li><h6 className="dropdown-header">Carrito de Compras</h6></li>
-                            <li><hr className="dropdown-divider" /></li>
-                            {store.totalItems === 0 ? (
-                                <li><span className="dropdown-item text-muted">El carrito está vacío.</span></li>
-                            ) : (
-                                store.items.map(item => (
-                                    <li key={item.id} className="dropdown-item d-flex justify-content-between align-items-center">
-                                        <span>{item.name} (x{item.quantity})</span>
-                                        <button className="btn btn-sm btn-outline-danger border-0 p-0" onClick={() => handleRemoveFromCart(item)}>
-                                            &times;
-                                        </button>
-                                    </li>
-                                ))
-                            )}
-                            <li><hr className="dropdown-divider" /></li>
+
+                        <ul className="dropdown-menu dropdown-menu-end p-2" >
                             <li>
-                                <Link className="dropdown-item text-center" to="/cart">
+                                <h6 className="dropdown-header text-center">Carrito de Compras</h6>
+                            </li>
+                            <li>
+                                <hr className="dropdown-divider" />
+                            </li>
+                            {store.cartItems.length === 0 ? (
+                                <li className="px-3 py-2">
+                                    <span className="dropdown-item-text text-muted">
+                                        Aún no hay artículos en el carrito.
+                                    </span>
+                                </li>
+                            ) : (
+                                <>
+                                    {store.cartItems.map(item => (
+                                        <li key={item.id} className="dropdown-item d-flex align-items-center mb-2 px-3 py-2">
+                                            <img
+                                                src={item.images && item.images.length > 0 ? item.images[0].image_url : "https://via.placeholder.com/50x50?text=No+Img"}
+                                                alt={item.name}
+                                                className="img-thumbnail me-2"
+                                                style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            />
+                                            <div className="flex-grow-1">
+                                                <p className="mb-0 fw-bold text-truncate" style={{ maxWidth: '150px' }}>{item.name}</p>
+                                                <small className="text-muted">
+                                                    <b>{item.cantidad} x US$ {item.price.toFixed(2)}</b>
+                                                </small>
+                                            </div>
+                                            <button
+                                                className="btn btn-sm btn-outline-danger border-0 px-2 ms-2"
+                                                onClick={() => handleRemoveFromCartDropdown(item)}
+                                                aria-label={`Eliminar ${item.name}`}
+                                            >
+                                                &times;
+                                            </button>
+                                        </li>
+                                    ))}
+                                    <li>
+                                        <hr className="dropdown-divider" />
+                                    </li>
+                                    <li className="px-3 py-2 text-end">
+                                        <p className="mb-0 fs-5">Total: <span className="fw-bold">US$ {store.cartItems.reduce((acc, item) => acc + item.price * item.cantidad, 0).toFixed(2)}</span></p>
+                                    </li>
+                                </>
+                            )}
+                            <li>
+                                <hr className="dropdown-divider" />
+                            </li>
+                            <li>
+                                <Link className="dropdown-item text-center btn btn-primary mt-2" to="/carrito">
                                     Ver Carrito Completo
                                 </Link>
                             </li>
@@ -89,7 +130,7 @@ export const Navbar = () => {
 
                     <div className="dropdown">
                         <button className="icon-link border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i className="fas fa-user"></i>
+                            <i className="fas fa-user fa-lg"></i>
                         </button>
                         <ul className="dropdown-menu dropdown-menu-end">
                             {!store.token ? (
@@ -114,6 +155,6 @@ export const Navbar = () => {
                     </div>
                 </div>
             </div>
-        </nav>
+        </nav >
     );
 };

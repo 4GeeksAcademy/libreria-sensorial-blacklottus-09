@@ -31,6 +31,7 @@ import { Carrito } from "./pages/Carrito";
 import { Busqueda } from "./pages/Busqueda";
 import { Kits } from "./pages/Kits";
 import { VistaProducto } from "./pages/VistaProducto";
+// import { Checkout } from "./pages/Checkout"
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -68,7 +69,7 @@ export const router = createBrowserRouter(
       <Route path="/kit/:id" element={<VistaProducto />} />
       <Route path="/carrito" element={<Carrito />} />
       <Route path="/busqueda" element={<Busqueda />} />
-
+      {/* <Route path="/checkout:id" element={<Busqueda/>} /> */}
     </Route>
   )
 );
