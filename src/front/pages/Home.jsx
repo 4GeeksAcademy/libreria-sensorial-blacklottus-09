@@ -16,7 +16,7 @@ export const Home = () => {
                     alt="Una colección de libros antiguos"
                     className="img-fluid w-100 banner"
                 />
-                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center banner" >
                     <h1 className="display-3 fw-bold contact-title text-white">
                         Más que un libro, una experiencia
                     </h1>
@@ -33,17 +33,17 @@ export const Home = () => {
                 <h2 className="contact-title mb-5">Una Experiencia Sensorial en 3 Pasos</h2>
                 <div className="row">
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-book-open fa-3x mb-3 text-accent"></i>
+                        <i className="fas fa-book-open fa-3x mb-3 text-terracota"></i>
                         <h3 className="h4 contact-title">1. Elige tu Aventura</h3>
                         <p className="text-muted">Selecciona un kit basado en el género o la sensación que buscas.</p>
                     </div>
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-box-open fa-3x mb-3 text-accent"></i>
+                        <i className="fas fa-box-open fa-3x mb-3 text-terracota"></i>
                         <h3 className="h4 contact-title">2. Recíbelo en tu Puerta</h3>
                         <p className="text-muted">Preparamos tu caja con todos los elementos cuidadosamente seleccionados.</p>
                     </div>
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-mug-hot fa-3x mb-3 text-accent"></i>
+                        <i className="fas fa-mug-hot fa-3x mb-3 text-terracota"></i>
                         <h3 className="h4 contact-title">3. Desconecta y Disfruta</h3>
                         <p className="text-muted">Prepara tu bebida, pon la música y déjate llevar por la lectura.</p>
                     </div>

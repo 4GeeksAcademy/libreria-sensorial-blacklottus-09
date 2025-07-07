@@ -37,9 +37,7 @@ export const Busqueda = () => {
     }, [query]);
 
     return (
-        // Fondo principal de la vista
         <div className="container py-5 background-focus">
-            {/* Título principal con la fuente 'Playfair Display' */}
             <h1 className="font-title text-center mb-5">Resultados de Búsqueda para: "{query}"</h1>
 
             {loading && <p className="text-center">Buscando...</p>}

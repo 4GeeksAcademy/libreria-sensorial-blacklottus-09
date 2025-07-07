@@ -1,189 +1,220 @@
 body {
-    background-color: #F8F5F2; /* Fondo crema suave */
-    font-family: 'Lato', sans-serif;
+  background-color: #f8f5f2;
+  font-family: "Lato", sans-serif;
 }
 .contact-title {
-    font-family: 'Playfair Display', serif;
-    color: #4A4441;
+  font-family: "Playfair Display", serif;
+  color: #4a4441;
 }
 
 .btn-custom-submit {
-    background-color: #BF7E6B; 
-    border-color: #BF7E6B;
-    color: #FFFFFF;
-    font-weight: bold;
-    padding: 12px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background-color 0.2s ease-in-out;
+  background-color: #bf7e6b;
+  border-color: #bf7e6b;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .btn-custom-submit:hover {
-    background-color: #A96A56;
-    border-color: #A96A56;
-    color: #FFFFFF;
+  background-color: #a96a56;
+  border-color: #a96a56;
+  color: #ffffff;
 }
 
 .link-custom {
-    color: #BF7E6B; 
-    font-weight: bold;
-    text-decoration: none;
+  color: #bf7e6b;
+  font-weight: bold;
+  text-decoration: none;
 }
 
 .link-custom:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .alert-custom-success {
-    background-color: #E6F4EA; 
-    color: #3D6A4B;
-    border: 1px solid #C4E4CD;
-    border-radius: 8px;
+  background-color: #e6f4ea;
+  color: #3d6a4b;
+  border: 1px solid #c4e4cd;
+  border-radius: 8px;
 }
 
-
 .navbar-custom-bg {
-    background-color: #FDFBF8; 
+  background-color: #fdfbf8;
 }
 
 .navbar-brand-custom {
-    font-family: 'Playfair Display', serif;
-    color: #4A4441;
+  font-family: "Playfair Display", serif;
+  color: #4a4441;
 }
 
 .nav-link-custom {
-    font-family: 'Lato', sans-serif;
-    color: #5C5552;
-    text-decoration: none;
-    transition: color 0.3s ease;
+  font-family: "Lato", sans-serif;
+  color: #5c5552;
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .nav-link-custom:hover {
-    color: #4A4441;
+  color: #4a4441;
 }
 
 .icon-link-custom {
-    color: #4A4441;
-    transition: color 0.3s ease;
+  color: #4a4441;
+  transition: color 0.3s ease;
 }
 
 .icon-link-custom:hover {
-    color: #BF7E6B;
+  color: #bf7e6b;
 }
 
 .bg-custom-accent {
-    background-color: #BF7E6B !important;
+  background-color: #bf7e6b !important;
 }
-
 
 .form-control:focus {
-    border-color: #BF7E6B;
-    box-shadow: 0 0 0 0.25rem rgba(191, 126, 107, 0.25);
+  border-color: #bf7e6b;
+  box-shadow: 0 0 0 0.25rem rgba(191, 126, 107, 0.25);
 }
-
 
 .footer-custom {
-    background-color: #4A4441;
-    color: #EAE3DC;
+  background-color: #4a4441;
+  color: #eae3dc;
 }
 
-.footer-brand-title, .footer-heading {
-    font-family: 'Playfair Display', serif;
-    color: #FFFFFF;
+.footer-brand-title,
+.footer-heading {
+  font-family: "Playfair Display", serif;
+  color: #ffffff;
 }
 
 .footer-text {
-    color: #D3CFC7;
-    font-size: 0.95rem;
+  color: #d3cfc7;
+  font-size: 0.95rem;
 }
 
 .footer-link {
-    color: #D3CFC7;
-    text-decoration: none;
-    transition: color 0.3s ease;
+  color: #d3cfc7;
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .footer-link:hover {
-    color: #FFFFFF;
+  color: #ffffff;
 }
 
 .social-link {
-    color: #EAE3DC;
-    font-size: 1.3rem;
-    text-decoration: none;
-    transition: color 0.3s ease;
+  color: #eae3dc;
+  font-size: 1.3rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .social-link:hover {
-    color: #BF7E6B;
+  color: #bf7e6b;
 }
 
 .newsletter-input {
-    background-color: #5C5552;
-    border: 1px solid #716965;
-    color: #FFFFFF;
+  background-color: #5c5552;
+  border: 1px solid #716965;
+  color: #ffffff;
 }
 .newsletter-input::placeholder {
-    color: #A9A29D;
+  color: #a9a29d;
 }
 .newsletter-input:focus {
-    background-color: #5C5552;
-    color: #FFFFFF;
-    border-color: #BF7E6B;
-    box-shadow: 0 0 0 0.2rem rgba(191, 126, 107, 0.25);
+  background-color: #5c5552;
+  color: #ffffff;
+  border-color: #bf7e6b;
+  box-shadow: 0 0 0 0.2rem rgba(191, 126, 107, 0.25);
 }
 
 .border-top-custom {
-    border-top: 1px solid #5C5552;
+  border-top: 1px solid #5c5552;
 }
 
 .alert-custom-success {
-    background-color: #E6F4EA; 
-    color: #3D6A4B;
-    border: 1px solid #C4E4CD;
-    border-radius: 8px;
+  background-color: #e6f4ea;
+  color: #3d6a4b;
+  border: 1px solid #c4e4cd;
+  border-radius: 8px;
 }
 
 .link-custom {
-    color: #BF7E6B; 
-    font-weight: bold;
-    text-decoration: none;
+  color: #bf7e6b;
+  font-weight: bold;
+  text-decoration: none;
 }
 
 .link-custom:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
-.logo-image{
-    height: 80px ;
+.logo-image {
+  height: 80px;
 }
-.banner{
-    height:  70vh; 
-    object-fit: cover;
-    background-color: rgba(0, 0, 0, 0.5)
+.banner {
+  height: 70vh;
+  object-fit: cover;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 .font-title {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
 }
 
-.text-terracota{
-    color:#BF7E6B;
+.text-terracota {
+  color: #bf7e6b;
 }
-.terracota{
-    background-color:#BF7E6B;
-    color:white
+.terracota {
+  background-color: #bf7e6b;
+  color: white;
 }
-.background-focus{
-    background-color: FDFBF8;
+.background-focus {
+  background-color: FDFBF8;
 }
 
-.user-picture{
-    width: 50px;
-    border-radius: 100%;
+.user-picture {
+  width: 50px;
+  border-radius: 100%;
 }
-.thumbnail-image{
-    width: 100px;
-    height: 100px;
-    cursor: pointer; 
+.thumbnail-image {
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+.accordion-button.disabled-terracota:not(.collapsed) {
+  background-color: #e2b4a1 !important;
+  color: #492a20;
+}
+
+.side-bar-item {
+  width: 16px;
+  height: 16px;
+}
+.side-bar-width{
+    width: 280px 
+}
+.cart-image{
+width: 50px;
+height: 50px;
+object-fit: cover 
+}
+.cart-item-name{
+     max-width: 150px 
+}
+.rating-bar-size{
+height: 20px
+}
+.cart-product{
+    max-width: 120px
+}
+.cover-fit{
+    object-fit: cover
+}
+.register-image{
     object-fit: cover;
+    opacity: 0.4
 }
-

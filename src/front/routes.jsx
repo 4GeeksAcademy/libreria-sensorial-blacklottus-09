@@ -19,19 +19,19 @@ import { PoliticaCancelacion } from "./pages/vistas genericas/PoliticaCancelacio
 import { NotFound } from "./pages/vistas genericas/NotFound";
 
 //inicio de sesion - registro y gestion de usuarios
-import { Registro } from "./pages/Registro";
-import { IniciarSesion } from "./pages/IniciarSesion";
-import { RecuperarContraseña } from "./pages/RecuperarContraseña";
-import { OlvidoContraseña } from "./pages/OlvidoContraseña";
-import { Perfil } from "./pages/Perfil";
-import { Pedidos } from "./pages/Pedidos";
+import { IniciarSesion } from "./pages/usuario/IniciarSesion";
+import { OlvidoContraseña } from "./pages/usuario/OlvidoContraseña";
+import { Registro } from "./pages/usuario/Registro";
+import { RecuperarContraseña } from "./pages/usuario/RecuperarContraseña";
 
 // busqueda y producto
-import { Carrito } from "./pages/Carrito";
+import { Carrito } from "./pages/pagos/Carrito";
 import { Busqueda } from "./pages/Busqueda";
 import { Kits } from "./pages/Kits";
 import { VistaProducto } from "./pages/VistaProducto";
-// import { Checkout } from "./pages/Checkout"
+import { PaymentSuccess } from "./pages/pagos/PaymentSuccess";
+import { PaymentCanceled } from "./pages/pagos/PaymentCanceled";
+import { OrderHistory } from "./pages/usuario/HistorialOrdenes";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -61,15 +61,15 @@ export const router = createBrowserRouter(
       <Route path="/iniciar-sesion" element={<IniciarSesion />} />
       <Route path="/olvido-su-contraseña" element={<OlvidoContraseña />} />
       <Route path="/recuperar-contraseña" element={<RecuperarContraseña />} />
-      <Route path="/perfil" element={<Perfil/>} />
-      <Route path="/pedidos" element={<Pedidos/>} />
 
       {/* kits, vista producto, carrito y busqueda */}
       <Route path="/kits" element={<Kits />} />
       <Route path="/kit/:id" element={<VistaProducto />} />
       <Route path="/carrito" element={<Carrito />} />
       <Route path="/busqueda" element={<Busqueda />} />
-      {/* <Route path="/checkout:id" element={<Busqueda/>} /> */}
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/payment-canceled" element={<PaymentCanceled />} />
+      <Route path="/historial-de-compras" element={<OrderHistory />} />
     </Route>
   )
 );

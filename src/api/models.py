@@ -21,7 +21,6 @@ class User(db.Model):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    # user info
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
@@ -29,21 +28,16 @@ class User(db.Model):
     salt: Mapped[str] = mapped_column(String(80), nullable=False, default="")
     avatar: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     shipping_address: Mapped[str] = mapped_column(Text, nullable=True)
-    # account status and roles
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean(), default=False)
-    # verification and security
     verified_at: Mapped[Optional[datetime]
                         ] = mapped_column(DateTime, nullable=True)
     updated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime, onupdate=func.now(), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False)
-    # relationships with other tables
     reviews = relationship("Review", back_populates="user")
     orders = relationship("Order", back_populates="user")
-    cart = relationship("ShoppingCart", back_populates="user", uselist=False, cascade="all, delete-orphan")
-
 
     def serialize(self):
         return {
@@ -87,6 +81,8 @@ class Product (db.Model):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     price: Mapped[float] = mapped_column(Float, nullable=False)
+    stripe_price_id: Mapped[str] = mapped_column(String(100), nullable=True)
+
     stock_quantity: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now())
@@ -108,7 +104,7 @@ class Product (db.Model):
             "images": [image.serialize() for image in self.images],
             "tags": [tag.serialize() for tag in self.tags],
             "average_rating": sum(rate.rating for rate in self.reviews) / len(self.reviews) if self.reviews else 0,
-            "reviews": [review.serialize() for review in self.reviews]
+            "reviews": [review.serialize() for review in self.reviews], "stripe_price_id": self.stripe_price_id
         }
 
 
@@ -199,6 +195,8 @@ class Order(db.Model):
         DateTime, server_default=func.now())
     total_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[OrderStatus] = mapped_column()
+    stripe_session_id: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["User"] = relationship(back_populates="orders")
@@ -221,59 +219,12 @@ class OrderItem(db.Model):
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
     order: Mapped["Order"] = relationship(back_populates="items")
 
-    def serialize(self):
-        return {
-            "id": self.id, "quantity": self.quantity, "price_per_unit": self.price_per_unit,
-        }
-    
-
-class ShoppingCart(db.Model):
-    __tablename__ = 'shopping_carts'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now())
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
-    user: Mapped["User"] = relationship(back_populates="cart")
-
-    items: Mapped[List["CartItem"]] = relationship(back_populates="cart", cascade="all, delete-orphan")
-
-    def get_total(self) -> float:
-        if not self.items:
-            return 0.0
-        return sum(item.product.price * item.quantity for item in self.items)
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "created_at": self.created_at,
-            "items": [item.serialize() for item in self.items],
-            "total_amount": self.get_total()
-        }
-
-
-class CartItem(db.Model):
-    __tablename__ = 'cart_items'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    quantity: Mapped[int] = mapped_column(Integer, default=1)
-
-    cart_id: Mapped[int] = mapped_column(ForeignKey("shopping_carts.id"), nullable=False)
-    cart: Mapped["ShoppingCart"] = relationship(back_populates="items")
-
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     product: Mapped["Product"] = relationship()
 
     def serialize(self):
         return {
-            "id": self.id,
-            "quantity": self.quantity,
-            "product_id": self.product_id,
-            "product": {  
-                "id": self.product.id,
-                "name": self.product.name,
-                "price": self.product.price,
-                "image_url": self.product.images[0].image_url if self.product.images else None
-            }
+            "id": self.id, "quantity": self.quantity, "price_per_unit": self.price_per_unit,
+            "product": self.product.serialize() if self.product else None 
+
         }
-    

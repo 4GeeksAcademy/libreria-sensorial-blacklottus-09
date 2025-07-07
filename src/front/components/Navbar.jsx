@@ -13,6 +13,7 @@ export const Navbar = () => {
     const totalItemsInCart = store.cartItems.reduce((total, item) => total + item.cantidad, 0);
 
     const handleLogout = () => {
+        localStorage.removeItem('token');
         dispatch({ type: "LOGOUT" });
         navigate("/");
     };
@@ -58,8 +59,9 @@ export const Navbar = () => {
                     <div className="btn-group me-3 m-auto ">
                         <button
                             type="button"
-                            className="btn border-0 position-relative icon-link bg-transparent p-0" 
+                            className="btn border-0 position-relative icon-link bg-transparent p-0"
                             data-bs-toggle="dropdown"
+                            data-bs-display="static"
                             aria-expanded="false"
                         >
                             <i className="fa-solid fa-cart-shopping fa-lg"></i>
@@ -71,7 +73,7 @@ export const Navbar = () => {
                             )}
                         </button>
 
-                        <ul className="dropdown-menu dropdown-menu-end p-2" >
+                        <ul className="dropdown-menu dropdown-menu-lg-end p-2" >
                             <li>
                                 <h6 className="dropdown-header text-center">Carrito de Compras</h6>
                             </li>
@@ -91,11 +93,10 @@ export const Navbar = () => {
                                             <img
                                                 src={item.images && item.images.length > 0 ? item.images[0].image_url : "https://via.placeholder.com/50x50?text=No+Img"}
                                                 alt={item.name}
-                                                className="img-thumbnail me-2"
-                                                style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                className="img-thumbnail me-2 cart-image"
                                             />
                                             <div className="flex-grow-1">
-                                                <p className="mb-0 fw-bold text-truncate" style={{ maxWidth: '150px' }}>{item.name}</p>
+                                                <p className="mb-0 fw-bold text-truncate">{item.name}</p>
                                                 <small className="text-muted">
                                                     <b>{item.cantidad} x US$ {item.price.toFixed(2)}</b>
                                                 </small>
@@ -129,10 +130,16 @@ export const Navbar = () => {
                     </div>
 
                     <div className="dropdown">
-                        <button className="icon-link border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button 
+                        className="icon-link border-0 bg-transparent" 
+                        type="button" 
+                        data-bs-display="static"
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false"
+                        >
                             <i className="fas fa-user fa-lg"></i>
                         </button>
-                        <ul className="dropdown-menu dropdown-menu-end">
+                        <ul className="dropdown-menu dropdown-menu-lg-end">
                             {!store.token ? (
                                 <>
                                     <li><Link className="dropdown-item" to="/iniciar-sesion">Iniciar Sesión</Link></li>
@@ -141,7 +148,7 @@ export const Navbar = () => {
                             ) : (
                                 <>
                                     <li><h6 className="dropdown-header">Mi Cuenta</h6></li>
-                                    <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li>
+                                    {/* <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li> */}
                                     <li><Link className="dropdown-item" to="/historial-de-compras">Mis Pedidos</Link></li>
                                     <li><hr className="dropdown-divider" /></li>
                                     <li>

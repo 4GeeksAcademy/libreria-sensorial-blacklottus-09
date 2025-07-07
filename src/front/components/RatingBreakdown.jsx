@@ -16,7 +16,7 @@ export const RatingBreakdown = ({ reviews }) => {
             {[5, 4, 3, 2, 1].map(starValue => (
                 <div key={starValue} className="d-flex align-items-center mb-2 ">
                     <span className="ms-3 pe-2">{starValue} <i className="fa-solid fa-star "></i></span>
-                    <div className="progress flex-grow-1" style={{ height: '20px' }}>
+                    <div className="progress flex-grow-1 rating-bar-size" >
                         <div
                             className="progress-bar terracota"
                             role="progressbar"

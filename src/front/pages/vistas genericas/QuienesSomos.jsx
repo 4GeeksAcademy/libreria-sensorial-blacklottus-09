@@ -76,7 +76,6 @@ export const QuienesSomos = () => {
                 </div>
             </div>
 
-            {/* --- Sección Llamada a la Acción (CTA) --- */}
             <div className="container text-center my-5 py-5">
                 <h2 className="contact-title">¿Lista para tu próxima aventura?</h2>
                 <p className="lead text-muted my-3">Explora nuestros kits y encuentra la historia que te está esperando.</p>

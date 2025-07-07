@@ -54,3 +54,8 @@ export const sortProducts = (products, sortBy) => {
 
     return sortedProducts;
 };
+
+export const calculateCartTotal = (cartItems) => {
+    if (!cartItems || cartItems.length === 0) return 0;
+    return cartItems.reduce((acc, item) => acc + item.price * item.cantidad, 0);
+};

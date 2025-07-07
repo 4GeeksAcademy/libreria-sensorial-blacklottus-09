@@ -23,6 +23,14 @@ export function StoreProvider({ children }) {
     }
 
     useEffect(()=>{
+        const token = localStorage.getItem('token');
+        
+        if (token) {
+            dispatch({
+                type: 'LOGIN',
+                payload: token
+            });
+        }
         fetchProducts()
     },[])
 

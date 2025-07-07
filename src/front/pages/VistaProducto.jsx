@@ -119,7 +119,7 @@ export const VistaProducto = () => {
         quantity={quantity}
         handleQuantityChange={handleQuantityChange}
         handleAddToCart={handleAddToCart}
-        title={product.name} // Pasa el nombre del producto como título
+        title={product.name} 
     />
         </div>
       </div>
@@ -137,7 +137,6 @@ export const VistaProducto = () => {
                     }`}
                   alt={image.alt_text}
                   onClick={() => setSelectedImage(image)}
-                  style={{ cursor: "pointer" }}
                 />
               </div>
             ))}

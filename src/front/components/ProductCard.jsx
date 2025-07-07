@@ -17,7 +17,7 @@ export const ProductCard = ({ product }) => {
                 <p className="card-text small text-secondary">
                     {product.description?.substring(0, 80)}...
                 </p>
-                <Link to={`/products/${product.id}`} className="btn btn-custom-submit mt-auto">
+                <Link to={`/kit/${product.id}`} className="btn btn-custom-submit mt-auto">
                     Ver Detalles
                 </Link>
             </div>
