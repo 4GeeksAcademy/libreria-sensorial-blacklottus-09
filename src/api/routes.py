@@ -1,8 +1,12 @@
+import json
 import os
+import stripe
+from sqlalchemy import or_
 from sqlalchemy.sql import func
-from flask import Flask, request, jsonify, url_for, Blueprint
+from flask import Flask, request, jsonify, url_for, Blueprint,  redirect
+
 from api.models import (db, User, ContactMessage, Newsletter,
-                        Product, ProductImage, ProductVariant,
+                        Product, ProductImage,
                         Category, Tag, Review, OrderStatus,
                         Order, OrderItem)
 from api.utils import generate_sitemap, APIException, password_security_check, send_email
@@ -29,10 +33,6 @@ def check_password(pass_hash, password, salt):
     return check_password_hash(pass_hash, f'{password}{salt}')
 
 
-expire_in_minutes = 10
-expires_delta = timedelta(minutes=expire_in_minutes)
-
-
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
 
@@ -51,38 +51,30 @@ def handle_register():
         "email": data_form.get("email", None),
         "name": data_form.get("name", None),
         "password": data_form.get("password", None),
-        "image": data_files.get("avatar", None)
+        "avatar": data_files.get("avatar", None)
     }
-    # se verifica que la respuesta tenga los datos solicitados
     if data["email"] is None or data["name"] is None or data["password"] is None:
         return jsonify({"msg": "Para poder crearse una cuenta se necesita la información completa"}), 400
-    # se valida que el correo no este guardado en la base de datos
     user = User.query.filter_by(email=data["email"]).one_or_none()
     if user is not None:
         return jsonify({"msg": "Este usuario ya esta registrado"}), 400
 
-    # usando la funcion que esta en utils se valida la seguridad de la contraseña
     if password_security_check(data["password"]) == False:
         return jsonify({"msg": "Para poder crear el usuario se necesita una contraseña segura"}), 400
-    # se crea el salt
     salt = b64encode(os.urandom(32)).decode("utf-8")
-    # se crea la contraseña
     password = set_password(data["password"], salt)
 
-    # se valida si se recibio una imagen y si se hizo se sube a cloudinary
-    if data["image"] is not None:
-        result_image = uploader.upload(data["image"])
+    if data["avatar"] is not None:
+        result_avatar = uploader.upload(data["avatar"])
 
-        data["image"] = result_image["secure_url"]
+        data["avatar"] = result_avatar["secure_url"]
 
-    # se crea una instancia de la clase User que esta vacia y se le asignan los datos
     user = User()
     user.email = data["email"]
     user.name = data["name"]
     user.password = password
     user.salt = salt
-    user.avatar = data["image"]
-    # se intenta guardar los datos si se completa se hace commit si no se regresa el mensaje de error
+    user.avatar = data["avatar"]
     try:
         db.session.add(user)
         db.session.commit()
@@ -94,24 +86,19 @@ def handle_register():
 
 @api.route('/login', methods=['POST'])
 def handle_login():
-    # se crea un endpoint login que recibe los datos de inicio de sesion del usuario
     data = request.json
     email = data.get("email", None)
     password = data.get("password", None)
-    # si no se recibieron datos se retorna que se necesita la info para proceder
     if email is None or password is None:
         return ({"msg": "Todos los campos son requeridos para iniciar sesion"}), 400
 
     else:
-        # si si se recibieron datos se filtran los datos de la tabla User buscando por la clave email
-        # si no se encuentra retorna false si se encuentra uno retorna true y se encuentra mas de uno
-        # retorna false
+        
         user = User.query.filter_by(email=email).one_or_none()
         if user is None:
             return ({"msg": "Las credenciales de acceso son invalidas"}), 400
         else:
             if check_password(user.password, password, user.salt):
-                # se revisa si el password concuerda con el que esta en la base de datos y si es correcto se envia un token
                 additional_claims = {
                     "is_admin": user.is_admin, "purpose": "Login"}
                 token = create_access_token(
@@ -127,7 +114,6 @@ def handle_login():
 @jwt_required()
 @admin_required()
 def get_all_users():
-    # se crea un endpoint para traer los datos de todos los usuarios y se filtra la info
     users = User.query.all()
 
     return jsonify(list(map(lambda item: item.serialize(), users))), 200
@@ -371,6 +357,8 @@ def create_product():
     description = data.get("description")
     category_id = data.get("category_id")
     price = data.get("price")
+    stripe_price_id = data.get("stripe_price_id")
+
     stock_quantity = data.get("stock_quantity", 0)
 
     if not data or not name or not description or not category_id or not price:
@@ -381,12 +369,13 @@ def create_product():
         description=description,
         category_id=category_id,
         price=price,
-        stock_quantity=stock_quantity
+        stock_quantity=stock_quantity,
+        stripe_price_id=stripe_price_id
     )
     try:
         db.session.add(new_product)
         db.session.commit()
-        return jsonify(new_product.serialize()), 200
+        return jsonify(new_product.serialize()), 201
     except Exception as error:
         db.session.rollback()
         return jsonify({"msg": f"Error creating product: {error}"}), 500
@@ -590,81 +579,6 @@ def delete_product_image(image_id):
         return jsonify({"msg": f"Error deleting image {error}"}), 500
 
 
-@api.route('/product/<int:product_id>/variants', methods=['POST'])
-@jwt_required()
-@admin_required()
-def create_product_variant(product_id):
-    product = Product.query.get(product_id)
-
-    if not product:
-        return jsonify({"msg": "Product not found"}), 404
-
-    data = request.json
-    name = data.get("name")
-    description = data.get("description")
-
-    if not name:
-        return jsonify({"msg": "Field 'name' is required"}), 400
-
-    new_variant = ProductVariant(
-        name=name, product_id=product.id, description=description
-    )
-    try:
-        db.session.add(new_variant)
-        db.session.commit()
-        return jsonify(new_variant.serialize()), 201
-    except Exception as error:
-        db.session.rollback()
-        return jsonify({"msg": f"Error creating variant: {error}"}), 500
-
-
-@api.route('/variants/<int:variant_id>', methods=['GET'])
-def get_variant(variant_id):
-    variant = ProductVariant.query.get(variant_id)
-    if not variant:
-        return jsonify({"msg": "Variant not found"}), 404
-    return jsonify(variant.serialize()), 200
-
-
-@api.route('/variants/<int:variant_id>', methods=['PUT'])
-@jwt_required()
-@admin_required()
-def update_variant(variant_id):
-    variant = ProductVariant.query.get(variant_id)
-    if not variant:
-        return jsonify({"msg": "Variant not found"}), 404
-
-    data = request.json
-    variant.name = data.get("name", variant.name)
-    variant.price = data.get("price", variant.price)
-    variant.stock_quantity = data.get("stock_quantity", variant.stock_quantity)
-
-    try:
-        db.session.commit()
-        return jsonify(variant.serialize()), 200
-    except Exception as error:
-        db.session.rollback()
-        return jsonify({"msg": f"Error updating variant: {error}"}), 500
-
-
-@api.route('/variants/<int:variant_id>', methods=['DELETE'])
-@jwt_required()
-@admin_required()
-def delete_variant(variant_id):
-    variant = ProductVariant.query.get(variant_id)
-
-    if not variant:
-        return jsonify({"msg": "Variant not found"}), 404
-
-    try:
-        db.session.delete(variant)
-        db.session.commit()
-        return jsonify({"msg": f"Variant {variant_id} deleted successfully"}), 200
-    except Exception as error:
-        db.session.rollback()
-        return jsonify({"msg": f"Error deleting variant: {error}"}), 500
-
-
 @api.route('/tags', methods=['POST'])
 @jwt_required()
 @admin_required()
@@ -745,24 +659,35 @@ def remove_tag_from_product(product_id, tag_id):
 @api.route('/products/<int:product_id>/reviews', methods=['POST'])
 @jwt_required()
 def create_review(product_id):
+
     current_user_id = get_jwt_identity()
 
     product = Product.query.get(product_id)
     if not product:
         return jsonify({"msg": "Product not found"}), 404
 
-    data = request.json
-    rating = data.get("rating")
-    if rating is None:
-        return jsonify({"msg": "Rating is required"}), 400
-
     existing_review = Review.query.filter_by(
         product_id=product.id, user_id=current_user_id).first()
     if existing_review:
         return jsonify({"msg": "You have already reviewed this product"}), 409
 
+    data = request.json
+    rating_str = data.get("rating")
+
+    if rating_str is None:
+        return jsonify({"msg": "Rating is required"}), 400
+
+    try:
+        rating = int(rating_str)
+    except ValueError:
+        return jsonify({"msg": "Rating must be a valid integer"}), 400
+
+    if rating < 1 or rating > 5:
+        return jsonify({"msg": "Rating should be a number between 1 and 5"}), 400
+
     new_review = Review(
         rating=rating,
+        title=data.get("title"),
         comment=data.get("comment"),
         product_id=product.id,
         user_id=current_user_id
@@ -774,7 +699,8 @@ def create_review(product_id):
         return jsonify(new_review.serialize()), 201
     except Exception as error:
         db.session.rollback()
-        return jsonify({"msg": f"Error creating review: {error}"}), 500
+        print(f"Error creating review: {error}")
+        return jsonify({"msg": "An internal error occurred while creating the review", "details": str(error)}), 500
 
 
 @api.route('/products/<int:product_id>/reviews', methods=['GET'])
@@ -849,40 +775,78 @@ def admin_delete_review(review_id):
         return jsonify({"msg": f"Error deleting review: {error}"}), 500
 
 
-@api.route('/orders', methods=['POST'])
+@api.route('/order/success', methods=['POST'])
 @jwt_required()
-def create_order():
+def handle_payment_success():
     current_user_id = get_jwt_identity()
-    data = request.json
-    items_data = data.get("items")
-    if not items_data:
-        return jsonify({"msg": "No items provided"}), 400
-    total_amount = 0
-    order_items_to_create = []
+    session_id = request.json.get('session_id')
+
+    if not session_id:
+        return jsonify({"msg": "No se proporcionó el ID de sesión"}), 400
+
     try:
-        for item_data in items_data:
-            variant = ProductVariant.query.get(item_data.get("variant_id"))
-            if not variant:
+        checkout_session = stripe.checkout.Session.retrieve(
+            session_id,
+            expand=['line_items.data.price.product']
+        )
+
+        if checkout_session.payment_status != "paid":
+            return jsonify({"msg": "El pago no fue completado o está pendiente"}), 400
+
+        existing_order = Order.query.filter_by(
+            stripe_session_id=session_id).first()
+        if existing_order:
+            return jsonify({"msg": "Esta orden ya fue procesada"}), 200
+
+        line_items = checkout_session.line_items.data
+        total_amount = checkout_session.amount_total / 100
+
+        order_items_to_create = []
+        for item in line_items:
+            product_id = item.price.product.metadata.get('local_product_id')
+            if not product_id:
                 raise Exception(
-                    f"Variant with ID {item_data.get('variant_id')} not found.")
-            if variant.stock_quantity < item_data.get("quantity"):
-                raise Exception(f"Not enough stock for {variant.name}.")
-            variant.stock_quantity -= item_data.get("quantity")
-            total_amount += variant.price * item_data.get("quantity")
+                    "No se encontró el ID de producto local en los metadatos de Stripe.")
+
+            product = Product.query.get(product_id)
+            if not product:
+                raise Exception(
+                    f"Producto con ID {product_id} no encontrado en la base de datos.")
+
+            quantity = item.quantity
+            if product.stock_quantity < quantity:
+                raise Exception(
+                    f"Stock insuficiente para el producto {product.name}.")
+
+            product.stock_quantity -= quantity
+
             order_items_to_create.append({
-                "variant_id": variant.id, "quantity": item_data.get("quantity"), "price_per_unit": variant.price
+                "product_id": product_id,
+                "quantity": quantity,
+                "price_per_unit": product.price
+
             })
-        new_order = Order(user_id=current_user_id, total_amount=total_amount)
+
+        new_order = Order(
+            user_id=current_user_id,
+            total_amount=total_amount,
+            status='pending',
+        )
         db.session.add(new_order)
         db.session.flush()
-        for item in order_items_to_create:
-            new_order_item = OrderItem(order_id=new_order.id, **item)
+
+        for item_data in order_items_to_create:
+            new_order_item = OrderItem(order_id=new_order.id, **item_data)
             db.session.add(new_order_item)
+
         db.session.commit()
+
         return jsonify(new_order.serialize()), 201
-    except Exception as error:
+    except stripe.error.StripeError as e:
+        return jsonify({"error": f"Error de Stripe: {str(e)}"}), 500
+    except Exception as e:
         db.session.rollback()
-        return jsonify({"msg": str(error)}), 400
+        return jsonify({"error": str(e)}), 400
 
 
 @api.route('/orders', methods=['GET'])
@@ -928,3 +892,71 @@ def update_order_status(order_id):
     except Exception as error:
         db.session.rollback()
         return jsonify({"msg": f"Error updating order status: {error}"}), 500
+
+
+@api.route('/products/search', methods=['GET'])
+def search_products():
+    query = request.args.get('q')
+
+    if not query:
+        return jsonify({"msg": "A keyword is needed to search"}), 400
+
+    search_term = f"%{query}%"
+
+    products_found = Product.query.filter(
+        or_(
+            Product.name.ilike(search_term),
+            Product.description.ilike(search_term)
+        )
+    ).all()
+
+    if not products_found:
+        return jsonify([]), 200
+    results = [product.serialize() for product in products_found]
+    return jsonify(results), 200
+
+
+@api.route('/create-checkout-session', methods=['POST'])
+@jwt_required()
+def create_checkout_session():
+    current_user_id = get_jwt_identity()
+    cart_items = request.json
+    line_items_for_stripe = []
+
+    if not cart_items:
+        return jsonify({"msg": "El carrito está vacío"}), 400
+
+    try:
+        for item in cart_items:
+            product_id = item.get("product_id")
+            quantity = item.get("quantity")
+
+            product = Product.query.get(product_id)
+            if not product:
+                raise Exception(f"Producto con ID {product_id} no encontrado")
+
+            if not product.stripe_price_id:
+                raise Exception(
+                    f"Producto '{product.name}' no está configurado para la venta.")
+
+            line_items_for_stripe.append({
+                "price": product.stripe_price_id,
+                "quantity": quantity
+            })
+
+        checkout_session = stripe.checkout.Session.create(
+            line_items=line_items_for_stripe,
+            mode='payment',
+            success_url=os.getenv(
+                "FRONTEND_URL") + '/payment-success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=os.getenv("FRONTEND_URL") + '/payment-canceled',
+            metadata={
+                'user_id': current_user_id,
+                'cart_items': json.dumps(cart_items)
+            }
+        )
+
+        return jsonify({"url": checkout_session.url}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

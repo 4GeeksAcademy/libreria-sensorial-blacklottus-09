@@ -35,8 +35,8 @@ export const OlvidoContraseña = () => {
     };
 
     return (
-        <div className="container d-flex align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
-            <div className="card shadow-sm border-0 rounded-4 bg-white" style={{ width: '100%', maxWidth: '500px' }}>
+        <div className="container d-flex align-items-center justify-content-center py-5" >
+            <div className="card shadow-sm border-0 rounded-4 bg-white" >
                 <div className="card-body p-4 p-md-5">
 
                     {!sent ? (
@@ -73,7 +73,7 @@ export const OlvidoContraseña = () => {
                         </>
                     ) : (
                         <div className="text-center">
-                            <i className="fas fa-envelope-open-text fa-3x mb-3" style={{ color: '#BF7E6B' }}></i>
+                            <i className="fas fa-envelope-open-text fa-3x mb-3" ></i>
                             <h2 className="contact-title mb-3">Revisa tu Correo</h2>
                             <p className="text-muted">
                                 Si tu correo está en nuestro sistema, en breve recibirás un enlace para recuperar tu contraseña.

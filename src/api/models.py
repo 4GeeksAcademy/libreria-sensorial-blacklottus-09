@@ -1,6 +1,8 @@
 import enum
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer, Text, Enum as SQLAlchemyEnum, ForeignKey, DateTime, func, Table
+from sqlalchemy import (String, Boolean, Integer, Text,
+                        Enum as SQLAlchemyEnum, ForeignKey,
+                        DateTime, func, Float)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import List, Optional
@@ -19,7 +21,6 @@ class User(db.Model):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    # user info
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
@@ -27,17 +28,14 @@ class User(db.Model):
     salt: Mapped[str] = mapped_column(String(80), nullable=False, default="")
     avatar: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     shipping_address: Mapped[str] = mapped_column(Text, nullable=True)
-    # account status and roles
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean(), default=False)
-    # verification and security
     verified_at: Mapped[Optional[datetime]
                         ] = mapped_column(DateTime, nullable=True)
     updated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime, onupdate=func.now(), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False)
-    # relationships with other tables
     reviews = relationship("Review", back_populates="user")
     orders = relationship("Order", back_populates="user")
 
@@ -45,7 +43,7 @@ class User(db.Model):
         return {
             "id": self.id, "email": self.email, "name": self.name, "avatar": self.avatar,
             "is_active": self.is_active, "is_admin": self.is_admin,
-            "verified_at": self.verified_at, "updated_at": self.updated_at, "created_at": self.created_at
+            "verified_at": self.verified_at, "updated_at": self.updated_at, "created_at": self.created_at,
         }
 
 
@@ -82,7 +80,9 @@ class Product (db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    stripe_price_id: Mapped[str] = mapped_column(String(100), nullable=True)
+
     stock_quantity: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now())
@@ -90,20 +90,21 @@ class Product (db.Model):
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
     category: Mapped["Category"] = relationship(back_populates="products")
 
-    variants: Mapped[List["ProductVariant"]] = relationship(back_populates="product") 
-    images: Mapped[List["ProductImage"]] = relationship(back_populates="product") 
-    reviews: Mapped[List["Review"]] = relationship(back_populates="product") 
-    tags: Mapped[List["Tag"]] = relationship(secondary=product_tags_association, back_populates="products")
+    images: Mapped[List["ProductImage"]] = relationship(
+        back_populates="product")
+    reviews: Mapped[List["Review"]] = relationship(back_populates="product")
+    tags: Mapped[List["Tag"]] = relationship(
+        secondary=product_tags_association, back_populates="products")
 
     def serialize(self):
         return {
             "id": self.id, "name": self.name, "description": self.description, "created_at": self.created_at,
-            "price": self.price, "stock_quantity":self.stock_quantity,
+            "price": self.price, "stock_quantity": self.stock_quantity,
             "category": self.category.serialize() if self.category else None,
             "images": [image.serialize() for image in self.images],
-            "variants": [variant.serialize() for variant in self.variants],
             "tags": [tag.serialize() for tag in self.tags],
-            "average_rating": sum(r.rating for r in self.reviews) / len(self.reviews) if self.reviews else 0
+            "average_rating": sum(rate.rating for rate in self.reviews) / len(self.reviews) if self.reviews else 0,
+            "reviews": [review.serialize() for review in self.reviews], "stripe_price_id": self.stripe_price_id
         }
 
 
@@ -119,21 +120,6 @@ class ProductImage(db.Model):
     def serialize(self):
         return {
             "id": self.id, "image_url": self.image_url, "alt_text": self.alt_text
-        }
-
-
-class ProductVariant(db.Model):
-    __tablename__ = "product_variants"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[int] = mapped_column(String(120), nullable=False)
-    description: Mapped[str] = mapped_column(Text)
-
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
-    product: Mapped["Product"] = relationship(back_populates="variants")
-
-    def serialize(self):
-        return {
-            "id": self.id, "name": self.name, "description": self.description
         }
 
 
@@ -173,6 +159,7 @@ class Review (db.Model):
     __tablename__ = 'reviews'
     id: Mapped[int] = mapped_column(primary_key=True)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    title: Mapped[Optional[str]] = mapped_column(String(200))
     comment: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now())
@@ -188,7 +175,9 @@ class Review (db.Model):
             "id": self.id, "rating": self.rating, "comment": self.comment,
             "created_at": self.created_at.isoformat(),
             "user_name": self.user.name if self.user else "Anónimo",
-            "product_id": self.product_id, "user_id": self.user_id
+            "produt_id": self.product_id, "user_id": self.user_id,
+            "title": self.title, "avatar": self.user.avatar
+
         }
 
 
@@ -206,6 +195,8 @@ class Order(db.Model):
         DateTime, server_default=func.now())
     total_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[OrderStatus] = mapped_column()
+    stripe_session_id: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["User"] = relationship(back_populates="orders")
@@ -228,11 +219,12 @@ class OrderItem(db.Model):
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
     order: Mapped["Order"] = relationship(back_populates="items")
 
-    variant_id: Mapped[int] = mapped_column(ForeignKey("product_variants.id"))
-    variant: Mapped["ProductVariant"] = relationship()
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    product: Mapped["Product"] = relationship()
 
     def serialize(self):
         return {
             "id": self.id, "quantity": self.quantity, "price_per_unit": self.price_per_unit,
-            "variant": self.variant.serialize() if self.variant else None
+            "product": self.product.serialize() if self.product else None 
+
         }

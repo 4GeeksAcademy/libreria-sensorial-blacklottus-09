@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { Link } from "react-router-dom"
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-
+import { ProductCard } from "../components/ProductCard.jsx";
 
 export const Home = () => {
 
@@ -11,13 +11,12 @@ export const Home = () => {
     return (
         <div className="body-custom-bg">
             <div className="position-relative text-center text-white">
-                <img 
-                    src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751735236/photo-1524995997946-a1c2e315a42f_kqzfz7.jpg" 
-                    alt="Una colección de libros antiguos" 
-                    className="img-fluid w-100"
-                    style={{ height: '70vh', objectFit: 'cover' }}
+                <img
+                    src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751888448/Gemini_Generated_Image_dtb7cidtb7cidtb7_vgnckj.png"
+                    alt="Una colección de libros antiguos"
+                    className="img-fluid w-100 banner"
                 />
-                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center banner" >
                     <h1 className="display-3 fw-bold contact-title text-white">
                         Más que un libro, una experiencia
                     </h1>
@@ -34,39 +33,30 @@ export const Home = () => {
                 <h2 className="contact-title mb-5">Una Experiencia Sensorial en 3 Pasos</h2>
                 <div className="row">
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-book-open fa-3x mb-3 text-accent"></i>
+                        <i className="fas fa-book-open fa-3x mb-3 text-terracota"></i>
                         <h3 className="h4 contact-title">1. Elige tu Aventura</h3>
                         <p className="text-muted">Selecciona un kit basado en el género o la sensación que buscas.</p>
                     </div>
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-box-open fa-3x mb-3 text-accent"></i>
+                        <i className="fas fa-box-open fa-3x mb-3 text-terracota"></i>
                         <h3 className="h4 contact-title">2. Recíbelo en tu Puerta</h3>
                         <p className="text-muted">Preparamos tu caja con todos los elementos cuidadosamente seleccionados.</p>
                     </div>
                     <div className="col-md-4 mb-4">
-                        <i className="fas fa-mug-hot fa-3x mb-3 text-accent"></i>
+                        <i className="fas fa-mug-hot fa-3x mb-3 text-terracota"></i>
                         <h3 className="h4 contact-title">3. Desconecta y Disfruta</h3>
                         <p className="text-muted">Prepara tu bebida, pon la música y déjate llevar por la lectura.</p>
                     </div>
                 </div>
             </div>
 
-            <div className="py-5" style={{ backgroundColor: '#FDFBF8' }}>
+            <div className="py-5 background-focus" >
                 <div className="container">
                     <h2 className="contact-title text-center mb-5">Algunos de Nuestros Kits</h2>
                     <div className="row">
                         {products.slice(0, 4).map((product) => (
                             <div key={product.id} className="col-lg-3 col-md-6 mb-4">
-                                <div className="card h-100 border-0 shadow-sm rounded-4">
-                                    <img src={product.images && product.images.length > 0 ? product.images[0].image_url : "https://via.placeholder.com/400x300"} className="card-img-top" alt={product.name} style={{ height: '250px', objectFit: 'cover' }} />
-                                    <div className="card-body d-flex flex-column">
-                                        <h5 className="card-title contact-title">{product.name}</h5>
-                                        <p className="card-text fs-4 mt-3 text-muted">{product.price} {" "}$</p>
-                                        <Link to={`/kit/${product.id}`} className="btn btn-custom-submit mt-auto">
-                                            Ver Detalles
-                                        </Link>
-                                    </div>
-                                </div>
+                                <ProductCard product={product} />
                             </div>
                         ))}
                     </div>

@@ -34,3 +34,28 @@ export const getProduct = async (id) => {
     throw error;
   }
 };
+
+export const sortProducts = (products, sortBy) => {
+    const sortedProducts = [...products];
+
+    switch (sortBy) {
+        case 'price-asc':
+            sortedProducts.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-desc':
+            sortedProducts.sort((a, b) => b.price - a.price);
+            break;
+        case 'name-asc':
+            sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        default:
+            break;
+    }
+
+    return sortedProducts;
+};
+
+export const calculateCartTotal = (cartItems) => {
+    if (!cartItems || cartItems.length === 0) return 0;
+    return cartItems.reduce((acc, item) => acc + item.price * item.cantidad, 0);
+};

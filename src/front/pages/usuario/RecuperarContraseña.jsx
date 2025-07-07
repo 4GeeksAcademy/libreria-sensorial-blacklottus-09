@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 
-import '../index.css';
-
 export const RecuperarContraseña = () => {
     const [newPass, setNewPass] = useState("");
     const [searchParams, _] = useSearchParams();

@@ -82,13 +82,12 @@ export const Registro = () => {
                 <div className="row g-0">
                     <div className="col-lg-6 d-none d-lg-flex align-items-center justify-content-center position-relative" style={{ backgroundColor: '#4A4441' }}>
                         <img
-                            src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1887"
+                            src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751917172/photo-1481627834876-b7833e8f5570_pkv3ih.jpg"
                             alt="Estantería llena de libros"
-                            className="img-fluid h-100"
-                            style={{ objectFit: 'cover', opacity: '0.4' }}
+                            className="img-fluid h-100 register-image"
                         />
                         <div className="position-absolute text-center p-5">
-                            <h2 className="display-5 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            <h2 className="display-5 text-white contact-title" >
                                 Comienza tu próxima aventura literaria
                             </h2>
                         </div>
