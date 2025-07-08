@@ -58,7 +58,7 @@ export const Footer = () => {
                         <ul className="list-unstyled">
                             <li className="mb-2"><Link to="/kits" className="footer-link">Kits</Link></li>
                             <li className="mb-2"><Link to="/quienes-somos" className="footer-link">Sobre Nosotros</Link></li>
-                            <li className="mb-2"><Link to="/contacto" className="footer-link">Contacto</Link></li>
+                            <li className="mb-2"><Link to="/contactanos" className="footer-link">Contacto</Link></li>
                         </ul>
                     </div>
 
