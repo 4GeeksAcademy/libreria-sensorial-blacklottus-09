@@ -13,7 +13,8 @@ export const Navbar = () => {
     const totalItemsInCart = store.cartItems.reduce((total, item) => total + item.cantidad, 0);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
         dispatch({ type: "LOGOUT" });
         navigate("/");
     };
@@ -130,14 +131,18 @@ export const Navbar = () => {
                     </div>
 
                     <div className="dropdown">
-                        <button 
-                        className="icon-link border-0 bg-transparent" 
-                        type="button" 
-                        data-bs-display="static"
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false"
+                        <button
+                            className="icon-link border-0 bg-transparent"
+                            type="button"
+                            data-bs-display="static"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
                         >
-                            <i className="fas fa-user fa-lg"></i>
+                            {
+                                (store.user && store.user.avatar)
+                                    ? <img src={store.user.avatar} className='user-picture border border-dark' alt={store.user.name} />
+                                    : <i className="fas fa-user fa-lg"></i>
+                            }
                         </button>
                         <ul className="dropdown-menu dropdown-menu-lg-end">
                             {!store.token ? (
@@ -147,6 +152,13 @@ export const Navbar = () => {
                                 </>
                             ) : (
                                 <>
+                                    {
+                                        (store.token && store.user?.is_admin) && (
+                                            <Link to="/admin" className="dropdown-item">
+                                                Panel de Admin
+                                            </Link>
+                                        )
+                                    }
                                     <li><h6 className="dropdown-header">Mi Cuenta</h6></li>
                                     {/* <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li> */}
                                     <li><Link className="dropdown-item" to="/historial-de-compras">Mis Pedidos</Link></li>

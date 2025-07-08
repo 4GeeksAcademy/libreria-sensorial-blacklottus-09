@@ -19,7 +19,7 @@ export const OrderHistory = () => {
             try {
                 const response = await fetch(`${url}/api/orders`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token.token}`
                     }
                 });
 

@@ -93,7 +93,7 @@ def handle_login():
         return ({"msg": "Todos los campos son requeridos para iniciar sesion"}), 400
 
     else:
-        
+
         user = User.query.filter_by(email=email).one_or_none()
         if user is None:
             return ({"msg": "Las credenciales de acceso son invalidas"}), 400
@@ -105,7 +105,10 @@ def handle_login():
                     identity=str(user.id),
                     additional_claims=additional_claims,
                     expires_delta=timedelta(hours=72))
-                return jsonify({"token": token}), 200
+                return jsonify({
+                    "token": token,
+                    "user": user.serialize()
+                }), 200
             else:
                 return ({"msg": "Las credenciales de acceso son invalidas"}), 400
 
@@ -401,25 +404,27 @@ def get_product(product_id):
 @admin_required()
 def update_product(product_id):
     product = Product.query.get(product_id)
-
     if not product:
-        return jsonify({"msg": "Product not found"}), 404
+        return jsonify({"msg": "Producto no encontrado"}), 404
 
     data = request.json
+    if not data:
+        return jsonify({"msg": "No se recibieron datos"}), 400
 
     product.name = data.get("name", product.name)
     product.description = data.get("description", product.description)
-    product.category_id = data.get("category_id", product.category_id)
-    product.price = data.get("price", product.price),
+    product.price = data.get("price", product.price)
     product.stock_quantity = data.get("stock_quantity", product.stock_quantity)
+    product.category_id = data.get("category_id", product.category_id)
+    product.stripe_price_id = data.get(
+        "stripe_price_id", product.stripe_price_id)
 
     try:
         db.session.commit()
         return jsonify(product.serialize()), 200
-
     except Exception as error:
         db.session.rollback()
-        return jsonify({"msg": f"There was an error {error}"}), 500
+        return jsonify({"msg": f"Error al actualizar el producto: {error}"}), 500
 
 
 @api.route('/products/<int:product_id>', methods=['DELETE'])
@@ -610,6 +615,33 @@ def get_all_tags():
     return jsonify(list(map(lambda item: item.serialize(), tags))), 200
 
 
+@api.route('/tags/<int:tag_id>', methods=['PUT'])
+@jwt_required()
+@admin_required()
+def update_tag(tag_id):
+    tag = Tag.query.get(tag_id)
+    if not tag:
+        return jsonify({"msg": "Etiqueta no encontrada"}), 404
+
+    data = request.json
+    tag.name = data.get('name', tag.name)
+    db.session.commit()
+    return jsonify(tag.serialize()), 200
+
+
+@api.route('/tags/<int:tag_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required()
+def delete_tag(tag_id):
+    tag = Tag.query.get(tag_id)
+    if not tag:
+        return jsonify({"msg": "Etiqueta no encontrada"}), 404
+
+    db.session.delete(tag)
+    db.session.commit()
+    return jsonify({"msg": "Etiqueta eliminada"}), 200
+
+
 @api.route('/products/<int:product_id>/tags/<int:tag_id>', methods=['POST'])
 @jwt_required()
 @admin_required()
@@ -747,7 +779,7 @@ def delete_review(review_id):
         return jsonify({"msg": "Review not found"}), 404
 
     if review.user_id != current_user_id:
-        return jsonify({"msg": "Forbidden: You are not the author of this review"}), 403
+        return jsonify({"msg": "Forbidden: You are not the author of this review"}),  403
 
     try:
         db.session.delete(review)
@@ -849,7 +881,7 @@ def handle_payment_success():
         return jsonify({"error": str(e)}), 400
 
 
-@api.route('/orders', methods=['GET'])
+@api.route('/all-orders', methods=['GET'])
 @jwt_required()
 def get_user_orders():
     current_user_id = get_jwt_identity()
@@ -857,6 +889,22 @@ def get_user_orders():
         user_id=current_user_id).order_by(Order.order_date.desc()).all()
     results = [order.serialize() for order in user_orders]
     return jsonify(results), 200
+
+
+@api.route('/orders', methods=['GET'])
+@jwt_required()
+@admin_required()
+def get_all_orders():
+    try:
+        # Ordena por fecha para mostrar las más recientes primero
+        orders = Order.query.order_by(Order.order_date.desc()).all()
+
+        # Serializa cada orden en la lista
+        results = [order.serialize() for order in orders]
+
+        return jsonify(results), 200
+    except Exception as e:
+        return jsonify({"error": f"Ocurrió un error: {str(e)}"}), 500
 
 
 @api.route('/orders/<int:order_id>', methods=['GET'])

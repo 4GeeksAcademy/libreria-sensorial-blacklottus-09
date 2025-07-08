@@ -2,56 +2,53 @@ import useGlobalReducer from "../hooks/useGlobalReducer";
 import { useParams } from "react-router-dom";
 import { getProduct } from "../services/products";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { RatingBreakdown } from "../components/RatingBreakdown";
 import { StarsRating } from "../components/StarsRating";
 import { ProductCard } from "../components/ProductCard";
 import { ProductCarousel } from "../components/ProductCarousel";
 import { ProductDetails } from "../components/ProductsDetails";
+import { FormularioReseña } from "./FormularioReseña";
 
 export const VistaProducto = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+
+  const [newReview, setNewReview] = useState({ rating: 0, title: '', comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState(null);
+
   const { store, dispatch } = useGlobalReducer();
   const { products } = store;
 
-  useEffect(() => {
-    let timer;
-
-    const fetchProductData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        timer = setTimeout(() => {
-          setError(
-            "No se pudo cargar el producto. Por favor, intenta de nuevo más tarde."
-          );
-          setLoading(false);
-        }, 30000);
-
-        const product_fetch = await getProduct(id);
-        if (product_fetch) {
-          setProduct(product_fetch);
-          if (product_fetch.images && product_fetch.images.length > 0) {
-            setSelectedImage(product_fetch.images[0]);
-          }
-          setQuantity(1);
-        } else {
-          setError("El producto no fue encontrado.");
-        }
-      } catch (err) {
-        console.error("Error al cargar el producto:", err);
-        setError("Ocurrió un error al cargar los datos del producto.");
-      } finally {
-        clearTimeout(timer);
+  let timer;
+  const fetchProductData = async () => {
+    try {
+      setLoading(true);
+      timer = setTimeout(() => {
         setLoading(false);
+      }, 30000);
+
+      const product_fetch = await getProduct(id);
+      if (product_fetch) {
+        setProduct(product_fetch);
+        if (product_fetch.images && product_fetch.images.length > 0) {
+          setSelectedImage(product_fetch.images[0]);
+        }
+        setQuantity(1);
+      } else {
       }
-    };
+    } catch (err) {
+      console.error("Error al cargar el producto:", err);
+    } finally {
+      clearTimeout(timer);
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+
 
     fetchProductData();
     return () => clearTimeout(timer);
@@ -70,6 +67,51 @@ export const VistaProducto = () => {
   const handleQuantityChange = (event) => {
     setQuantity(Number(event.target.value));
   };
+  const handleRatingChange = (rating) => {
+    setNewReview({ ...newReview, rating });
+  };
+
+  const handleReviewChange = (e) => {
+    setNewReview({ ...newReview, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    if (newReview.rating === 0) {
+      setReviewMessage({ type: 'error', text: 'Por favor, selecciona una calificación.' });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    setReviewMessage(null);
+
+    try {
+      console.log({ "token": store.token })
+
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products/${id}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${store.token.token}`
+        },
+        body: JSON.stringify(newReview)
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.msg || "Error al enviar la reseña.");
+
+      setReviewMessage({ type: 'success', text: '¡Gracias por tu reseña!' });
+      setNewReview({ rating: 0, title: '', comment: '' });
+      fetchProductData();
+    } catch (error) {
+      setReviewMessage({ type: 'error', text: error.message });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const canLeaveReview = store.token && product && !product.reviews.some(review => review.user_id === store.user?.id);
+
 
   if (loading) {
     return (
@@ -114,13 +156,13 @@ export const VistaProducto = () => {
               carouselId="vistaPrincipalCarousel"
             />
           </div>
-          <ProductDetails 
-        product={product}
-        quantity={quantity}
-        handleQuantityChange={handleQuantityChange}
-        handleAddToCart={handleAddToCart}
-        title={product.name} 
-    />
+          <ProductDetails
+            product={product}
+            quantity={quantity}
+            handleQuantityChange={handleQuantityChange}
+            handleAddToCart={handleAddToCart}
+            title={product.name}
+          />
         </div>
       </div>
 
@@ -158,7 +200,7 @@ export const VistaProducto = () => {
               quantity={quantity}
               handleQuantityChange={handleQuantityChange}
               handleAddToCart={handleAddToCart}
-              title={product.name} 
+              title={product.name}
             />
           </div>
         </div>
@@ -193,7 +235,19 @@ export const VistaProducto = () => {
           </div>
           <RatingBreakdown reviews={product.reviews}></RatingBreakdown>
         </div>
+
         <div className="col-md-8 col-12 ">
+          {canLeaveReview && (
+            <FormularioReseña
+              newReview={newReview}
+              handleRatingChange={handleRatingChange}
+              handleReviewChange={handleReviewChange}
+              handleSubmitReview={handleSubmitReview}
+              isSubmitting={isSubmittingReview}
+              reviewMessage={reviewMessage}
+            />
+          )}
+
           {product.reviews && product.reviews.length > 0 ? (
             product.reviews.slice(0, 10).map((review, index) => (
               <div key={review.id || index} className="pb-4 border-bottom mb-3">

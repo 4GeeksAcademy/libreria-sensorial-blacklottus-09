@@ -218,3 +218,7 @@ height: 20px
     object-fit: cover;
     opacity: 0.4
 }
+
+.rating-starts{
+  cursor: pointer
+}

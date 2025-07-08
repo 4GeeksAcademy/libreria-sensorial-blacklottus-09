@@ -36,12 +36,19 @@ export const IniciarSesion = () => {
 
             if (response.ok) {
                 localStorage.setItem("token", data.token);
-                dispatch({ type: "LOGIN", payload: data.token });
-                console.log(store)
+                localStorage.setItem("user", JSON.stringify(data.user));
+
+                dispatch({ type: "LOGIN", payload: { token: data.token, user: data.user } });
+
                 setMessage({ type: 'success', text: "¡Inicio de sesión exitoso! Redirigiendo..." });
-                setTimeout(() => navigate("/"), 20000);
+
+                if (data.user?.is_admin) {
+                    setTimeout(() => navigate("/admin"), 1500);
+                } else {
+                    setTimeout(() => navigate("/"), 1500);
+                }
             } else {
-                setMessage({ type: 'error', text: data.msg || "El correo o la contraseña son incorrectos." });
+                setMessage({ type: 'error', text: data.msg || "Credenciales incorrectas." });
             }
         } catch (error) {
             console.error("Error en la solicitud de login:", error);
@@ -52,8 +59,9 @@ export const IniciarSesion = () => {
     };
 
     if (store.token) {
-        return <Navigate to="/" />;
+        return <Navigate to={store.user?.is_admin ? "/admin" : "/"} replace />;
     }
+
 
     return (
         <div className="container my-5">
@@ -96,7 +104,7 @@ export const IniciarSesion = () => {
                             src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751917064/photo-1505330622279-bf7d7fc918f4_p4zljd.jpg"
                             alt="Banner relajante para acompañar el inicio de sesion"
                             className="img-fluid h-100 cover-fit"
-                            
+
                         />
                     </div>
                 </div>

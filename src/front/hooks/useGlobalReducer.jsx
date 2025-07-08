@@ -15,24 +15,32 @@ export function StoreProvider({ children }) {
     const [store, dispatch] = useReducer(storeReducer, initialStore())
     // Provide the store and dispatch method to all child components.
 
-    const fetchProducts = async()=>{
+    const fetchProducts = async () => {
         const products = await getAllProducts()
-        if (products){
-            dispatch({type:"GET_PRODUCTS", payload:products})
+        if (products) {
+            dispatch({ type: "GET_PRODUCTS", payload: products })
         }
     }
 
-    useEffect(()=>{
-        const token = localStorage.getItem('token');
-        
-        if (token) {
-            dispatch({
-                type: 'LOGIN',
-                payload: token
-            });
-        }
+    useEffect(() => {
+        const initializeApp = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const userString = localStorage.getItem('user');
+                if (token && userString) {
+                    const user = JSON.parse(userString);
+                    dispatch({ type: 'LOGIN', payload: { token, user } });
+                }
+            } catch (error) {
+                console.error("Error al inicializar la sesión:", error);
+                localStorage.clear();
+            } finally {
+                dispatch({ type: 'AUTH_IS_READY' });
+            }
+        };
         fetchProducts()
-    },[])
+        initializeApp();
+    }, [dispatch]);
 
     return <StoreContext.Provider value={{ store, dispatch }}>
         {children}

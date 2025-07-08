@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 2f8389f7b123
+Revision ID: 8749fc5c7ac5
 Revises: 
-Create Date: 2025-07-07 22:15:17.618204
+Create Date: 2025-07-08 14:51:14.017086
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2f8389f7b123'
+revision = '8749fc5c7ac5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,7 +23,8 @@ def upgrade():
     sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('parent_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['parent_id'], ['categories.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('contact_message',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -51,7 +52,7 @@ def upgrade():
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password', sa.String(length=200), nullable=False),
     sa.Column('salt', sa.String(length=80), nullable=False),
-    sa.Column('avatar', sa.String(length=120), nullable=True),
+    sa.Column('avatar', sa.String(length=255), nullable=True),
     sa.Column('shipping_address', sa.Text(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_admin', sa.Boolean(), nullable=False),
@@ -80,7 +81,7 @@ def upgrade():
     sa.Column('stripe_price_id', sa.String(length=100), nullable=True),
     sa.Column('stock_quantity', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('category_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -111,7 +112,7 @@ def upgrade():
     )
     op.create_table('reviews',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('rating', sa.Integer(), nullable=False),
+    sa.Column('rating', sa.Float(), nullable=False),
     sa.Column('title', sa.String(length=200), nullable=True),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),

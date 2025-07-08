@@ -20,7 +20,7 @@ export const PaymentSuccess = () => {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${store.token}`
+                            'Authorization': `Bearer ${store.token.token}`
                         },
                         body: JSON.stringify({ session_id: sessionId })
                     });
@@ -40,7 +40,7 @@ export const PaymentSuccess = () => {
         } else {
             setStatus('error');
         }
-    }, [sessionId, dispatch, store.token, url]);
+    }, [sessionId, dispatch, store.token.token, url]);
 
     if (status === 'processing') {
         return <div className="text-center py-5"><h2>Verificando tu pago...</h2></div>;

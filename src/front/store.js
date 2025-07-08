@@ -1,6 +1,8 @@
 export const initialStore = () => {
   return {
-    token: null,
+    token: "",
+    user: {},
+    authIsReady: false,
     cartItems: [],
     products: [],
   };
@@ -80,17 +82,26 @@ export default function storeReducer(store, action = {}) {
         ...store,
         cartItems: [],
       };
+    
+    case 'AUTH_IS_READY': 
+            return {
+                ...store,
+                authIsReady: true
+            };
 
     case "LOGIN":
       return {
         ...store,
         token: action.payload,
+        user: action.payload.user 
+
       };
 
     case "LOGOUT":
       return {
         ...store,
         token: null,
+        user: {},
         cartItems: [],
       };
 

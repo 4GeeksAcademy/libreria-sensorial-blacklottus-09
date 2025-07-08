@@ -33,6 +33,18 @@ import { PaymentSuccess } from "./pages/pagos/PaymentSuccess";
 import { PaymentCanceled } from "./pages/pagos/PaymentCanceled";
 import { OrderHistory } from "./pages/usuario/HistorialOrdenes";
 
+//admin views
+import { AdminLayout } from "./pages/admin/AdminLayout"
+import { AdminProtectedRoute } from "./pages/admin/AdminProtectedRoute"
+import { AdminDashboard } from "./pages/admin/AdminDashboard"
+import { ManageProducts } from "./pages/admin/ManageProducts"
+import { ManageUsers } from "./pages/admin/ManageUsers";
+import { ManageOrders } from "./pages/admin/ManageOrders";
+import { ContactReview } from "./pages/admin/ContactReview";
+import { EditProduct } from "./pages/admin/EditProduct";
+import { CreateProduct } from "./pages/admin/CreateProduct";
+import { ManageTaxonomies } from "./pages/admin/ManageTaxonomies";
+
 export const router = createBrowserRouter(
   createRoutesFromElements(
     // CreateRoutesFromElements function allows you to build route elements declaratively.
@@ -70,6 +82,21 @@ export const router = createBrowserRouter(
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-canceled" element={<PaymentCanceled />} />
       <Route path="/historial-de-compras" element={<OrderHistory />} />
+
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          {/* La página por defecto del admin */}
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<ManageProducts />} />
+          <Route path="orders" element={<ManageOrders />} />
+          <Route path="users" element={<ManageUsers />} />
+          <Route path="contact" element={<ContactReview />} />
+          <Route path="products/edit/:productId" element={<EditProduct />} />
+          <Route path="products/new" element={<CreateProduct />} />
+          <Route path="taxonomies" element={<ManageTaxonomies />} />
+        </Route>
+      </Route>
+
     </Route>
   )
 );
