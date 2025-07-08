@@ -66,7 +66,7 @@ export const Home = () => {
             <div className="container my-5 py-5">
                 <div className="row align-items-center">
                     <div className="col-lg-6 mb-4 mb-lg-0">
-                        <img src="https://picsum.photos/500/200" className="img-fluid rounded-4 shadow" alt="Rincón de lectura acogedor" />
+                        <img src="https://res.cloudinary.com/dpue1nnbe/image/upload/v1751989633/unnamed_2_zg0zw7.png" className="img-fluid rounded-4 shadow" alt="Rincón de lectura acogedor" />
                     </div>
                     <div className="col-lg-6 ps-lg-5">
                         <h2 className="contact-title mb-3">Una Invitación a la Pausa</h2>

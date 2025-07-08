@@ -39,7 +39,7 @@ export const IniciarSesion = () => {
                 localStorage.setItem("user", JSON.stringify(data.user));
 
                 dispatch({ type: "LOGIN", payload: { token: data.token, user: data.user } });
-
+                console.log(store)
                 setMessage({ type: 'success', text: "¡Inicio de sesión exitoso! Redirigiendo..." });
 
                 if (data.user?.is_admin) {

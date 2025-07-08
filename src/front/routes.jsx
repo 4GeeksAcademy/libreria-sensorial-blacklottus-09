@@ -19,6 +19,7 @@ import { PoliticaCancelacion } from "./pages/vistas genericas/PoliticaCancelacio
 import { NotFound } from "./pages/vistas genericas/NotFound";
 
 //inicio de sesion - registro y gestion de usuarios
+import { Perfil } from "./pages/usuario/Perfil";
 import { IniciarSesion } from "./pages/usuario/IniciarSesion";
 import { OlvidoContraseña } from "./pages/usuario/OlvidoContraseña";
 import { Registro } from "./pages/usuario/Registro";
@@ -69,6 +70,7 @@ export const router = createBrowserRouter(
       <Route path="*" element={<NotFound />} />
 
       {/* inicio de sesion y manejo de usuario */}
+      <Route path="/perfil" element ={<Perfil/>} />
       <Route path="/registro" element={<Registro />} />
       <Route path="/iniciar-sesion" element={<IniciarSesion />} />
       <Route path="/olvido-su-contraseña" element={<OlvidoContraseña />} />

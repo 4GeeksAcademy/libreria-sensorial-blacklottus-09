@@ -82,19 +82,18 @@ export default function storeReducer(store, action = {}) {
         ...store,
         cartItems: [],
       };
-    
-    case 'AUTH_IS_READY': 
-            return {
-                ...store,
-                authIsReady: true
-            };
+
+    case "AUTH_IS_READY":
+      return {
+        ...store,
+        authIsReady: true,
+      };
 
     case "LOGIN":
       return {
         ...store,
-        token: action.payload,
-        user: action.payload.user 
-
+        token: action.payload.token,
+        user: action.payload.user,
       };
 
     case "LOGOUT":
@@ -103,6 +102,14 @@ export default function storeReducer(store, action = {}) {
         token: null,
         user: {},
         cartItems: [],
+      };
+
+    case "UPDATE_USER":
+      const updatedUser = action.payload;
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return {
+        ...store,
+        user: updatedUser,
       };
 
     default:

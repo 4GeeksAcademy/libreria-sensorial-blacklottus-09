@@ -137,6 +137,51 @@ def get_user():
     return jsonify(user.serialize())
 
 
+@api.route('/me', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
+    data = request.json
+    
+    user.name = data.get('name', user.name)
+    user.shipping_address = data.get('shipping_address', user.shipping_address)
+
+    try:
+        db.session.commit()
+        return jsonify(user.serialize()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": f"Error al actualizar el perfil: {str(e)}"}), 500
+
+@api.route('/me/avatar', methods=['POST'])
+@jwt_required()
+def upload_avatar():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
+    if 'avatar' not in request.files:
+        return jsonify({"msg": "No se encontró el archivo del avatar"}), 400
+
+    avatar_file = request.files['avatar']
+    
+    try:
+        upload_result = uploader.upload(avatar_file)
+        avatar_url = upload_result.get("secure_url")
+
+        user.avatar = avatar_url
+        db.session.commit()
+        
+        return jsonify({"avatar_url": avatar_url}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": f"Error al subir la imagen: {str(e)}"}), 500
+
 @api.route('/forgot-password', methods=["POST"])
 def forgot_password():
     body = request.json

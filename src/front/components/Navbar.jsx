@@ -1,6 +1,6 @@
 import React from 'react';
 import useGlobalReducer from '../hooks/useGlobalReducer';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/navbar.css';
 import logo from '../assets/img/logo.png';
@@ -9,6 +9,7 @@ export const Navbar = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const { store, dispatch } = useGlobalReducer();
     const navigate = useNavigate();
+    const {user} = store
 
     const totalItemsInCart = store.cartItems.reduce((total, item) => total + item.cantidad, 0);
 
@@ -29,6 +30,9 @@ export const Navbar = () => {
             setSearchQuery('');
         }
     };
+    useEffect(() => {
+    console.log("El store ha cambiado:", store);
+}, [store]);
 
     return (
         <nav className="navbar navbar-expand-lg navbar-custom sticky-top pt-1">
@@ -139,8 +143,8 @@ export const Navbar = () => {
                             aria-expanded="false"
                         >
                             {
-                                (store.user && store.user.avatar)
-                                    ? <img src={store.user.avatar} className='user-picture border border-dark' alt={store.user.name} />
+                                (user && user.avatar)
+                                    ? <img src={user.avatar} className='user-picture border border-dark' alt={store.user.name} />
                                     : <i className="fas fa-user fa-lg"></i>
                             }
                         </button>
@@ -160,7 +164,7 @@ export const Navbar = () => {
                                         )
                                     }
                                     <li><h6 className="dropdown-header">Mi Cuenta</h6></li>
-                                    {/* <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li> */}
+                                    <li><Link className="dropdown-item" to="/perfil">Mi Perfil</Link></li>
                                     <li><Link className="dropdown-item" to="/historial-de-compras">Mis Pedidos</Link></li>
                                     <li><hr className="dropdown-divider" /></li>
                                     <li>
